@@ -10,7 +10,7 @@ import (
 	"git.home/alex/go-subscriptions/internal/service/category"
 )
 
-func TestCategoryService_Create(t *testing.T) {
+func TestService_Create(t *testing.T) {
 	type testCase struct {
 		test             string
 		name             string
@@ -54,7 +54,7 @@ func TestCategoryService_Create(t *testing.T) {
 	}
 }
 
-func TestCategoryService_Get(t *testing.T) {
+func TestService_Get(t *testing.T) {
 	type testCase struct {
 		test             string
 		expectedCategory *entity.Category
@@ -102,7 +102,7 @@ func TestCategoryService_Get(t *testing.T) {
 	}
 }
 
-func TestCategoryService_GetAll(t *testing.T) {
+func TestService_GetAll(t *testing.T) {
 	type testCase struct {
 		test               string
 		expectedCategories repository.Categories
@@ -153,7 +153,7 @@ func TestCategoryService_GetAll(t *testing.T) {
 	}
 }
 
-func TestCategoryService_Update(t *testing.T) {
+func TestService_Update(t *testing.T) {
 	type testCase struct {
 		test            string
 		name            string
@@ -209,7 +209,7 @@ func TestCategoryService_Update(t *testing.T) {
 	}
 }
 
-func TestCategoryService_Delete(t *testing.T) {
+func TestService_Delete(t *testing.T) {
 	s, err := category.NewCategoryService(category.WithMemoryCategoryRepository())
 	if err != nil {
 		t.Fatal(err)
