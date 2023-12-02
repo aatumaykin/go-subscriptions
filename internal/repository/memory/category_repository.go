@@ -30,7 +30,7 @@ func (r *CategoryRepository) Create(ctx context.Context, category entity.Categor
 	return &category, nil
 }
 
-func (r *CategoryRepository) GetByID(ctx context.Context, ID uint) (*entity.Category, error) {
+func (r *CategoryRepository) Get(ctx context.Context, ID uint) (*entity.Category, error) {
 	r.Lock()
 	defer r.Unlock()
 

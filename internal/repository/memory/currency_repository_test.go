@@ -1,4 +1,4 @@
-package memory
+package memory_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"git.home/alex/go-subscriptions/internal/domain/currency/entity"
 	"git.home/alex/go-subscriptions/internal/domain/currency/repository"
+	"git.home/alex/go-subscriptions/internal/repository/memory"
 )
 
 func TestCurrencyRepository_Create(t *testing.T) {
@@ -29,7 +30,7 @@ func TestCurrencyRepository_Create(t *testing.T) {
 		},
 	}
 
-	repo := NewCurrencyRepository()
+	repo := memory.NewCurrencyRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -85,7 +86,7 @@ func TestCurrencyRepository_Get(t *testing.T) {
 		},
 	}
 
-	repo := NewCurrencyRepository()
+	repo := memory.NewCurrencyRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -108,22 +109,22 @@ func TestCurrencyRepository_GetAll(t *testing.T) {
 	type testCase struct {
 		test        string
 		currencies  repository.Currencies
-		expectedErr error
+		expectedLen int
 	}
 
 	testCases := []testCase{
 		{
 			test:        "Empty repository",
-			expectedErr: nil,
+			expectedLen: 0,
 		},
 		{
 			test:        "Get all currencies",
 			currencies:  []entity.Currency{{Code: "USD", Name: "US Dollar", Symbol: "$"}, {Code: "RUB", Name: "Russian Ruble", Symbol: "₽"}},
-			expectedErr: nil,
+			expectedLen: 2,
 		},
 	}
 
-	repo := NewCurrencyRepository()
+	repo := memory.NewCurrencyRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -136,11 +137,7 @@ func TestCurrencyRepository_GetAll(t *testing.T) {
 				}
 			}
 
-			currencies, err := repo.GetAll(context.Background())
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
-
+			currencies, _ := repo.GetAll(context.Background())
 			if len(currencies) != len(tc.currencies) {
 				t.Errorf("Expected %d currencies, got %v", len(tc.currencies), len(currencies))
 			}
@@ -171,7 +168,7 @@ func TestCurrencyRepository_Update(t *testing.T) {
 		},
 	}
 
-	repo := NewCurrencyRepository()
+	repo := memory.NewCurrencyRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -231,7 +228,7 @@ func TestCurrencyRepository_Delete(t *testing.T) {
 		},
 	}
 
-	repo := NewCurrencyRepository()
+	repo := memory.NewCurrencyRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {

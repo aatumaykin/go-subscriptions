@@ -30,7 +30,7 @@ func (r *CycleRepository) Create(ctx context.Context, cycle entity.Cycle) (*enti
 	return &cycle, nil
 }
 
-func (r *CycleRepository) GetByID(ctx context.Context, ID uint) (*entity.Cycle, error) {
+func (r *CycleRepository) Get(ctx context.Context, ID uint) (*entity.Cycle, error) {
 	r.Lock()
 	defer r.Unlock()
 

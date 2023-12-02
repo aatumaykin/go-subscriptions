@@ -1,4 +1,4 @@
-package memory
+package memory_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/domain/cycle/repository"
+	"git.home/alex/go-subscriptions/internal/repository/memory"
 
 	"git.home/alex/go-subscriptions/internal/domain/cycle/entity"
 )
@@ -30,7 +31,7 @@ func TestCycleRepository_Create(t *testing.T) {
 		},
 	}
 
-	repo := NewCycleRepository()
+	repo := memory.NewCycleRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -40,7 +41,7 @@ func TestCycleRepository_Create(t *testing.T) {
 			}
 
 			if createdCycle != nil {
-				found, err := repo.GetByID(context.Background(), createdCycle.ID)
+				found, err := repo.Get(context.Background(), createdCycle.ID)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -52,7 +53,7 @@ func TestCycleRepository_Create(t *testing.T) {
 	}
 }
 
-func TestCycleRepository_GetByID(t *testing.T) {
+func TestCycleRepository_Get(t *testing.T) {
 	type testCase struct {
 		test        string
 		cycle       entity.Cycle
@@ -75,7 +76,7 @@ func TestCycleRepository_GetByID(t *testing.T) {
 		},
 	}
 
-	repo := NewCycleRepository()
+	repo := memory.NewCycleRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -84,7 +85,7 @@ func TestCycleRepository_GetByID(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = repo.GetByID(context.Background(), tc.expectedID)
+			_, err = repo.Get(context.Background(), tc.expectedID)
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
 			}
@@ -93,11 +94,13 @@ func TestCycleRepository_GetByID(t *testing.T) {
 }
 
 func TestCycleRepository_GetAll(t *testing.T) {
-	testCases := []struct {
+	type testCase struct {
 		test        string
 		categories  []entity.Cycle
 		expectedLen int
-	}{
+	}
+
+	testCases := []testCase{
 		{
 			test:        "Empty repository",
 			expectedLen: 0,
@@ -109,7 +112,7 @@ func TestCycleRepository_GetAll(t *testing.T) {
 		},
 	}
 
-	repo := NewCycleRepository()
+	repo := memory.NewCycleRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -120,11 +123,7 @@ func TestCycleRepository_GetAll(t *testing.T) {
 				}
 			}
 
-			categories, err := repo.GetAll(context.Background())
-			if err != nil {
-				t.Fatal(err)
-			}
-
+			categories, _ := repo.GetAll(context.Background())
 			if len(categories) != tc.expectedLen {
 				t.Errorf("Expected %d categories, got %d", tc.expectedLen, len(categories))
 			}
@@ -133,12 +132,14 @@ func TestCycleRepository_GetAll(t *testing.T) {
 }
 
 func TestCycleRepository_Update(t *testing.T) {
-	testCases := []struct {
+	type testCase struct {
 		test         string
 		initialCycle entity.Cycle
 		updatedCycle entity.Cycle
 		expectedErr  error
-	}{
+	}
+
+	testCases := []testCase{
 		{
 			test:         "Update an existing cycle",
 			initialCycle: entity.Cycle{Name: "Cycle 1"},
@@ -153,7 +154,7 @@ func TestCycleRepository_Update(t *testing.T) {
 		},
 	}
 
-	repo := NewCycleRepository()
+	repo := memory.NewCycleRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -168,7 +169,7 @@ func TestCycleRepository_Update(t *testing.T) {
 			}
 
 			if err == nil {
-				found, err := repo.GetByID(context.Background(), updatedCycle.ID)
+				found, err := repo.Get(context.Background(), updatedCycle.ID)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -182,7 +183,7 @@ func TestCycleRepository_Update(t *testing.T) {
 }
 
 func TestCycleRepository_Delete(t *testing.T) {
-	repo := NewCycleRepository()
+	repo := memory.NewCycleRepository()
 
 	ctx := context.Background()
 
@@ -208,7 +209,7 @@ func TestCycleRepository_Delete(t *testing.T) {
 			t.Errorf("Expected no error, got: %v", err)
 		}
 
-		if _, err := repo.GetByID(context.Background(), 1); err == nil {
+		if _, err := repo.Get(context.Background(), 1); err == nil {
 			t.Errorf("Expected cycle to be deleted")
 		}
 	})

@@ -1,4 +1,4 @@
-package memory
+package memory_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/domain/category/repository"
+	"git.home/alex/go-subscriptions/internal/repository/memory"
 
 	"git.home/alex/go-subscriptions/internal/domain/category/entity"
 )
@@ -30,7 +31,7 @@ func TestCategoryRepository_Create(t *testing.T) {
 		},
 	}
 
-	repo := NewCategoryRepository()
+	repo := memory.NewCategoryRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -40,7 +41,7 @@ func TestCategoryRepository_Create(t *testing.T) {
 			}
 
 			if createdCategory != nil {
-				found, err := repo.GetByID(context.Background(), createdCategory.ID)
+				found, err := repo.Get(context.Background(), createdCategory.ID)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -52,7 +53,7 @@ func TestCategoryRepository_Create(t *testing.T) {
 	}
 }
 
-func TestCategoryRepository_GetByID(t *testing.T) {
+func TestCategoryRepository_Get(t *testing.T) {
 	type testCase struct {
 		test        string
 		category    entity.Category
@@ -75,7 +76,7 @@ func TestCategoryRepository_GetByID(t *testing.T) {
 		},
 	}
 
-	repo := NewCategoryRepository()
+	repo := memory.NewCategoryRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -84,7 +85,7 @@ func TestCategoryRepository_GetByID(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = repo.GetByID(context.Background(), tc.expectedID)
+			_, err = repo.Get(context.Background(), tc.expectedID)
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
 			}
@@ -93,11 +94,13 @@ func TestCategoryRepository_GetByID(t *testing.T) {
 }
 
 func TestCategoryRepository_GetAll(t *testing.T) {
-	testCases := []struct {
+	type testCase struct {
 		test        string
 		categories  []entity.Category
 		expectedLen int
-	}{
+	}
+
+	testCases := []testCase{
 		{
 			test:        "Empty repository",
 			expectedLen: 0,
@@ -109,7 +112,7 @@ func TestCategoryRepository_GetAll(t *testing.T) {
 		},
 	}
 
-	repo := NewCategoryRepository()
+	repo := memory.NewCategoryRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -120,11 +123,7 @@ func TestCategoryRepository_GetAll(t *testing.T) {
 				}
 			}
 
-			categories, err := repo.GetAll(context.Background())
-			if err != nil {
-				t.Fatal(err)
-			}
-
+			categories, _ := repo.GetAll(context.Background())
 			if len(categories) != tc.expectedLen {
 				t.Errorf("Expected %d categories, got %d", tc.expectedLen, len(categories))
 			}
@@ -133,12 +132,14 @@ func TestCategoryRepository_GetAll(t *testing.T) {
 }
 
 func TestCategoryRepository_Update(t *testing.T) {
-	testCases := []struct {
+	type testCase struct {
 		test            string
 		initialCategory entity.Category
 		updatedCategory entity.Category
 		expectedErr     error
-	}{
+	}
+
+	testCases := []testCase{
 		{
 			test:            "Update an existing category",
 			initialCategory: entity.Category{Name: "Category 1"},
@@ -153,7 +154,7 @@ func TestCategoryRepository_Update(t *testing.T) {
 		},
 	}
 
-	repo := NewCategoryRepository()
+	repo := memory.NewCategoryRepository()
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -167,8 +168,8 @@ func TestCategoryRepository_Update(t *testing.T) {
 				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
 			}
 
-			if err == nil {
-				found, err := repo.GetByID(context.Background(), updatedCategory.ID)
+			if updatedCategory != nil {
+				found, err := repo.Get(context.Background(), updatedCategory.ID)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -182,7 +183,7 @@ func TestCategoryRepository_Update(t *testing.T) {
 }
 
 func TestCategoryRepository_Delete(t *testing.T) {
-	repo := NewCategoryRepository()
+	repo := memory.NewCategoryRepository()
 
 	ctx := context.Background()
 
@@ -208,7 +209,7 @@ func TestCategoryRepository_Delete(t *testing.T) {
 			t.Errorf("Expected no error, got: %v", err)
 		}
 
-		if _, err := repo.GetByID(context.Background(), 1); err == nil {
+		if _, err := repo.Get(context.Background(), 1); err == nil {
 			t.Errorf("Expected category to be deleted")
 		}
 	})

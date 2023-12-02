@@ -2,8 +2,16 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"git.home/alex/go-subscriptions/internal/domain/subscription/entity"
+)
+
+var (
+	ErrNotFoundSubscription = errors.New("the subscription was not found in the repository")
+	ErrCreateSubscription   = errors.New("failed to add the subscription to the repository")
+	ErrUpdateSubscription   = errors.New("failed to update the subscription in the repository")
+	ErrDeleteSubscription   = errors.New("failed to delete the subscription from the repository")
 )
 
 type Subscriptions []entity.Subscription
