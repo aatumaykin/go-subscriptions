@@ -2,8 +2,16 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"git.home/alex/go-subscriptions/internal/domain/cycle/entity"
+)
+
+var (
+	ErrNotFoundCycle = errors.New("the cycle was not found in the repository")
+	ErrCreateCycle   = errors.New("failed to add the cycle to the repository")
+	ErrUpdateCycle   = errors.New("failed to update the cycle in the repository")
+	ErrDeleteCycle   = errors.New("failed to delete the cycle from the repository")
 )
 
 type Cycles []entity.Cycle

@@ -208,7 +208,7 @@ func TestCategoryRepository_Delete(t *testing.T) {
 			t.Errorf("Expected no error, got: %v", err)
 		}
 
-		if _, ok := repo.categories[1]; ok {
+		if _, err := repo.GetByID(context.Background(), 1); err == nil {
 			t.Errorf("Expected category to be deleted")
 		}
 	})
