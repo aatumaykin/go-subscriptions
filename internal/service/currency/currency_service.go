@@ -12,49 +12,49 @@ type Service struct {
 	repository repository.CurrencyRepository
 }
 
-type ServiceConfiguration func(cs *Service) error
+type Configuration func(s *Service) error
 
-func NewCurrencyService(cfgs ...ServiceConfiguration) (*Service, error) {
-	cs := &Service{}
+func NewCurrencyService(cfgs ...Configuration) (*Service, error) {
+	s := &Service{}
 
 	// Apply all Configurations passed in
 	for _, cfg := range cfgs {
-		err := cfg(cs)
+		err := cfg(s)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return cs, nil
+	return s, nil
 }
 
-func WithCurrencyRepository(r repository.CurrencyRepository) ServiceConfiguration {
-	return func(cs *Service) error {
-		cs.repository = r
+func WithCurrencyRepository(r repository.CurrencyRepository) Configuration {
+	return func(s *Service) error {
+		s.repository = r
 		return nil
 	}
 }
 
-func WithMemoryCurrencyRepository() ServiceConfiguration {
+func WithMemoryCurrencyRepository() Configuration {
 	return WithCurrencyRepository(memory.NewCurrencyRepository())
 }
 
-func (cs *Service) Create(ctx context.Context, currency entity.Currency) (*entity.Currency, error) {
-	return cs.repository.Create(ctx, currency)
+func (s *Service) Create(ctx context.Context, currency entity.Currency) (*entity.Currency, error) {
+	return s.repository.Create(ctx, currency)
 }
 
-func (cs *Service) Get(ctx context.Context, code string) (*entity.Currency, error) {
-	return cs.repository.Get(ctx, code)
+func (s *Service) Get(ctx context.Context, code string) (*entity.Currency, error) {
+	return s.repository.Get(ctx, code)
 }
 
-func (cs *Service) GetAll(ctx context.Context) (repository.Currencies, error) {
-	return cs.repository.GetAll(ctx)
+func (s *Service) GetAll(ctx context.Context) (repository.Currencies, error) {
+	return s.repository.GetAll(ctx)
 }
 
-func (cs *Service) Update(ctx context.Context, currency entity.Currency) (*entity.Currency, error) {
-	return cs.repository.Update(ctx, currency)
+func (s *Service) Update(ctx context.Context, currency entity.Currency) (*entity.Currency, error) {
+	return s.repository.Update(ctx, currency)
 }
 
-func (cs *Service) Delete(ctx context.Context, code string) error {
-	return cs.repository.Delete(ctx, code)
+func (s *Service) Delete(ctx context.Context, code string) error {
+	return s.repository.Delete(ctx, code)
 }

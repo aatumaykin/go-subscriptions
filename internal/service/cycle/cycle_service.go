@@ -28,7 +28,7 @@ func NewCycleService(cfgs ...ServiceConfiguration) (*Service, error) {
 	return cs, nil
 }
 
-func WithCurrencyRepository(r repository.CycleRepository) ServiceConfiguration {
+func WithCycleRepository(r repository.CycleRepository) ServiceConfiguration {
 	return func(cs *Service) error {
 		cs.repository = r
 		return nil
@@ -36,7 +36,7 @@ func WithCurrencyRepository(r repository.CycleRepository) ServiceConfiguration {
 }
 
 func WithMemoryCycleRepository() ServiceConfiguration {
-	return WithCurrencyRepository(memory.NewCycleRepository())
+	return WithCycleRepository(memory.NewCycleRepository())
 }
 
 func (cs *Service) Create(ctx context.Context, cycle entity.Cycle) (*entity.Cycle, error) {

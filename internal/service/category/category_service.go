@@ -12,30 +12,30 @@ type Service struct {
 	repository repository.CategoryRepository
 }
 
-type ServiceConfiguration func(cs *Service) error
+type Configuration func(s *Service) error
 
-func NewCategoryService(cfgs ...ServiceConfiguration) (*Service, error) {
-	cs := &Service{}
+func NewCategoryService(cfgs ...Configuration) (*Service, error) {
+	s := &Service{}
 
 	// Apply all Configurations passed in
 	for _, cfg := range cfgs {
-		err := cfg(cs)
+		err := cfg(s)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return cs, nil
+	return s, nil
 }
 
-func WithCategoryRepository(r repository.CategoryRepository) ServiceConfiguration {
+func WithCategoryRepository(r repository.CategoryRepository) Configuration {
 	return func(cs *Service) error {
 		cs.repository = r
 		return nil
 	}
 }
 
-func WithMemoryCategoryRepository() ServiceConfiguration {
+func WithMemoryCategoryRepository() Configuration {
 	return WithCategoryRepository(memory.NewCategoryRepository())
 }
 

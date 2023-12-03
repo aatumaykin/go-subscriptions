@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"git.home/alex/go-subscriptions/internal/api"
 	"git.home/alex/go-subscriptions/internal/app"
 	"github.com/spf13/cobra"
 )
@@ -13,10 +14,19 @@ var runCmd = &cobra.Command{
 			return err
 		}
 
-		api := application.NewAPI()
-		api.InitRoutes()
+		httpServer, err := api.NewHTTPServer(
+			api.WithTimeout(application.Config.Timeout),
+			api.WithListenAddr(application.Config.ListenAddr),
+			api.WithContext(application.Context),
+			api.WithDefaultRouter(),
+			api.WithHealthHandler(),
+			api.WithCategoriesHandler(application.ServiceFactory.CategoryService),
+		)
+		if err != nil {
+			return err
+		}
 
-		api.ListenAndServe()
+		httpServer.ListenAndServe()
 
 		return nil
 	},

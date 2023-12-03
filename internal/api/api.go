@@ -10,37 +10,72 @@ import (
 	"syscall"
 	"time"
 
-	"git.home/alex/go-subscriptions/internal/api/handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/health_handler"
+	categoryserviceinterface "git.home/alex/go-subscriptions/internal/domain/category/service"
 	"github.com/julienschmidt/httprouter"
 )
 
-type API struct {
+type HTTPServer struct {
 	ListenAddr string
 	Timeout    time.Duration
+	router     *httprouter.Router
+	ctx        context.Context
 }
 
-func NewAPI(listenAddr string, timeout time.Duration) *API {
-	return &API{
-		ListenAddr: listenAddr,
-		Timeout:    timeout,
+type Configuration func(s *HTTPServer) error
+
+func NewHTTPServer(cfgs ...Configuration) (*HTTPServer, error) {
+	s := &HTTPServer{}
+
+	// Apply all Configurations passed in
+	for _, cfg := range cfgs {
+		err := cfg(s)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return s, nil
+}
+
+func WithListenAddr(addr string) Configuration {
+	return func(s *HTTPServer) error {
+		s.ListenAddr = addr
+		return nil
 	}
 }
 
-func (a *API) InitRoutes() *httprouter.Router {
-	router := httprouter.New()
-
-	router.GET("/health", handler.Health())
-
-	return router
+func WithTimeout(timeout time.Duration) Configuration {
+	return func(s *HTTPServer) error {
+		s.Timeout = timeout
+		return nil
+	}
 }
 
-func (a *API) ListenAndServe() {
-	router := a.InitRoutes()
+func WithRouter(router *httprouter.Router) Configuration {
+	return func(s *HTTPServer) error {
+		s.router = router
+		return nil
+	}
+}
 
+func WithDefaultRouter() Configuration {
+	return WithRouter(httprouter.New())
+}
+
+func WithContext(ctx context.Context) Configuration {
+	return func(s *HTTPServer) error {
+		s.ctx = ctx
+		return nil
+	}
+}
+
+func (s *HTTPServer) ListenAndServe() {
 	server := &http.Server{
-		Addr:        a.ListenAddr,
-		Handler:     router,
-		ReadTimeout: a.Timeout * time.Second,
+		Addr:        s.ListenAddr,
+		Handler:     s.router,
+		ReadTimeout: s.Timeout * time.Second,
 	}
 
 	// Create a channel to receive signals
@@ -49,7 +84,7 @@ func (a *API) ListenAndServe() {
 
 	// Start the server in a goroutine
 	go func() {
-		slog.Info("API server started", "address", a.ListenAddr)
+		slog.Info("API server started", "address", s.ListenAddr)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("listen: %s\n", err)
 		}
@@ -67,4 +102,18 @@ func (a *API) ListenAndServe() {
 	server.Shutdown(ctx)
 
 	slog.Info("Shutting down")
+}
+
+func WithHealthHandler() Configuration {
+	return func(s *HTTPServer) error {
+		s.router.GET("/health", health_handler.Handle())
+		return nil
+	}
+}
+
+func WithCategoriesHandler(categoryService categoryserviceinterface.CategoryService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.GET("/api/categories", category_handler.AllCategoriesHandle(s.ctx, categoryService))
+		return nil
+	}
 }
