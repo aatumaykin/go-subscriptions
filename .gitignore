@@ -115,3 +115,4 @@ fabric.properties
 go.work
 
 bin
+config.yaml

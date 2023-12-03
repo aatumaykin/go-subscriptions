@@ -3,11 +3,12 @@ package cmd
 import (
 	"os"
 
-	application "git.home/alex/go-subscriptions/internal/app"
 	"github.com/spf13/cobra"
 )
 
-var app *application.App
+var (
+	cfgFile string
+)
 
 var rootCmd = &cobra.Command{
 	Use: "subscriptions",
@@ -16,8 +17,6 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	initCommands()
 
-	app = application.NewApp()
-
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -25,6 +24,9 @@ func Execute() {
 }
 
 func initCommands() {
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "config.yaml", "config file (default is config.yaml)")
+
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(runCmd)
 }

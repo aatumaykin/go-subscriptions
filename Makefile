@@ -34,3 +34,7 @@ test:
 .PHONY: modules
 modules:
 	go mod tidy && go mod vendor
+
+.PHONY: run
+run:
+	go run main.go run

@@ -1,0 +1,3 @@
+storage: memory
+listen_addr: ":8080"
+timeout: 15s
