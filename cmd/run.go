@@ -20,7 +20,7 @@ var runCmd = &cobra.Command{
 			api.WithContext(application.Context),
 			api.WithDefaultRouter(),
 			api.WithHealthHandler(),
-			api.WithCategoriesHandler(application.ServiceFactory.CategoryService),
+			api.WithCategoryCollectionGetterHandler(application.ServiceFactory.CategoryCollectionGetter),
 		)
 		if err != nil {
 			return err

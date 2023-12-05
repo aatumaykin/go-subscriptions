@@ -17,8 +17,8 @@ import (
 )
 
 type HTTPServer struct {
-	ListenAddr string
-	Timeout    time.Duration
+	listenAddr string
+	timeout    time.Duration
 	router     *httprouter.Router
 	ctx        context.Context
 }
@@ -41,14 +41,14 @@ func NewHTTPServer(cfgs ...Configuration) (*HTTPServer, error) {
 
 func WithListenAddr(addr string) Configuration {
 	return func(s *HTTPServer) error {
-		s.ListenAddr = addr
+		s.listenAddr = addr
 		return nil
 	}
 }
 
 func WithTimeout(timeout time.Duration) Configuration {
 	return func(s *HTTPServer) error {
-		s.Timeout = timeout
+		s.timeout = timeout
 		return nil
 	}
 }
@@ -73,9 +73,9 @@ func WithContext(ctx context.Context) Configuration {
 
 func (s *HTTPServer) ListenAndServe() {
 	server := &http.Server{
-		Addr:        s.ListenAddr,
+		Addr:        s.listenAddr,
 		Handler:     s.router,
-		ReadTimeout: s.Timeout * time.Second,
+		ReadTimeout: s.timeout * time.Second,
 	}
 
 	// Create a channel to receive signals
@@ -84,7 +84,7 @@ func (s *HTTPServer) ListenAndServe() {
 
 	// Start the server in a goroutine
 	go func() {
-		slog.Info("API server started", "address", s.ListenAddr)
+		slog.Info("API server started", "address", s.listenAddr)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("listen: %s\n", err)
 		}
@@ -111,9 +111,9 @@ func WithHealthHandler() Configuration {
 	}
 }
 
-func WithCategoriesHandler(categoryService categoryserviceinterface.CategoryService) Configuration {
+func WithCategoryCollectionGetterHandler(collectionGetter categoryserviceinterface.CollectionGetter) Configuration {
 	return func(s *HTTPServer) error {
-		s.router.GET("/api/categories", category_handler.AllCategoriesHandle(s.ctx, categoryService))
+		s.router.GET("/api/categories", category_handler.CollectionGetterHandle(s.ctx, collectionGetter))
 		return nil
 	}
 }

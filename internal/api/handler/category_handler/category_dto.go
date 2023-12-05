@@ -2,13 +2,13 @@ package category_handler
 
 import "git.home/alex/go-subscriptions/internal/domain/category/entity"
 
-type categoryDTO struct {
+type CategoryDTO struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
-func categoryToDTO(category entity.Category) categoryDTO {
-	return categoryDTO{
+func CategoryToDTO(category entity.Category) CategoryDTO {
+	return CategoryDTO{
 		ID:   category.ID,
 		Name: category.Name,
 	}

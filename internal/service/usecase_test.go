@@ -55,7 +55,10 @@ func initServices(t *testing.T) {
 
 	var err error
 
-	categoryService, err = categoryservice.NewCategoryService(categoryservice.WithMemoryCategoryRepository())
+	categoryService, err = categoryservice.NewCategoryService(
+		categoryservice.WithMemoryCategoryRepository(),
+		categoryservice.WithCreator(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +72,7 @@ func initServices(t *testing.T) {
 func createCategory(ctx context.Context, t *testing.T, name string, expectedID uint) *Category {
 	t.Helper()
 
-	category, err := categoryService.Create(ctx, name)
+	category, err := categoryService.Creator.Create(ctx, name)
 	if err != nil {
 		t.Fatal(err)
 	}

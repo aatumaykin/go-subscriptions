@@ -12,11 +12,11 @@ import (
 )
 
 type ServiceFactory struct {
-	repositoryFactory   *RepositoryFactory
-	CategoryService     categoryserviceinterface.CategoryService
-	CurrencyService     currencyserviceinterface.CurrencyService
-	CycleService        cycleserviceinterface.CycleService
-	SubscriptionService subscriptionserviceinterface.SubscriptionService
+	repositoryFactory        *RepositoryFactory
+	CategoryCollectionGetter categoryserviceinterface.CollectionGetter
+	CurrencyService          currencyserviceinterface.CurrencyService
+	CycleService             cycleserviceinterface.CycleService
+	SubscriptionService      subscriptionserviceinterface.SubscriptionService
 }
 
 type ServiceConfiguration func(sf *ServiceFactory) error
@@ -46,12 +46,17 @@ func WithCategoryService() ServiceConfiguration {
 	return func(sf *ServiceFactory) error {
 		cs, err := category.NewCategoryService(
 			category.WithCategoryRepository(sf.repositoryFactory.CategoryRepository),
+			category.WithCreator(),
+			category.WithGetter(),
+			category.WithCollectionGetter(),
+			category.WithUpdater(),
+			category.WithDeleter(),
 		)
 		if err != nil {
 			return err
 		}
 
-		sf.CategoryService = cs
+		sf.CategoryCollectionGetter = cs.CollectionGetter
 		return nil
 	}
 }

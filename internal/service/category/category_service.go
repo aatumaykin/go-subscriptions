@@ -1,15 +1,18 @@
 package category
 
 import (
-	"context"
-
-	"git.home/alex/go-subscriptions/internal/domain/category/entity"
 	"git.home/alex/go-subscriptions/internal/domain/category/repository"
+	"git.home/alex/go-subscriptions/internal/domain/category/service"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
 )
 
 type Service struct {
-	repository repository.CategoryRepository
+	repository.CategoryRepository
+	service.Getter
+	service.CollectionGetter
+	service.Creator
+	service.Updater
+	service.Deleter
 }
 
 type Configuration func(s *Service) error
@@ -30,7 +33,7 @@ func NewCategoryService(cfgs ...Configuration) (*Service, error) {
 
 func WithCategoryRepository(r repository.CategoryRepository) Configuration {
 	return func(cs *Service) error {
-		cs.repository = r
+		cs.CategoryRepository = r
 		return nil
 	}
 }
@@ -39,26 +42,37 @@ func WithMemoryCategoryRepository() Configuration {
 	return WithCategoryRepository(memory.NewCategoryRepository())
 }
 
-func (cs *Service) Create(ctx context.Context, name string) (*entity.Category, error) {
-	category := entity.Category{
-		Name: name,
+func WithCollectionGetter() Configuration {
+	return func(cs *Service) error {
+		cs.CollectionGetter = NewCollectionGetter(cs.CategoryRepository)
+		return nil
 	}
-
-	return cs.repository.Create(ctx, category)
 }
 
-func (cs *Service) Get(ctx context.Context, ID uint) (*entity.Category, error) {
-	return cs.repository.Get(ctx, ID)
+func WithGetter() Configuration {
+	return func(cs *Service) error {
+		cs.Getter = NewGetter(cs.CategoryRepository)
+		return nil
+	}
 }
 
-func (cs *Service) GetAll(ctx context.Context) (repository.Categories, error) {
-	return cs.repository.GetAll(ctx)
+func WithUpdater() Configuration {
+	return func(cs *Service) error {
+		cs.Updater = NewUpdater(cs.CategoryRepository)
+		return nil
+	}
 }
 
-func (cs *Service) Update(ctx context.Context, category entity.Category) (*entity.Category, error) {
-	return cs.repository.Update(ctx, category)
+func WithCreator() Configuration {
+	return func(cs *Service) error {
+		cs.Creator = NewCreator(cs.CategoryRepository)
+		return nil
+	}
 }
 
-func (cs *Service) Delete(ctx context.Context, ID uint) error {
-	return cs.repository.Delete(ctx, ID)
+func WithDeleter() Configuration {
+	return func(cs *Service) error {
+		cs.Deleter = NewDeleter(cs.CategoryRepository)
+		return nil
+	}
 }
