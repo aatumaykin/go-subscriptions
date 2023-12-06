@@ -83,20 +83,20 @@ func TestCategoryService_CreateCategory(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("Create", ctx, tt.category).Return(tt.wantResult, tt.wantErr)
+			mockRepo.On("Create", ctx, tc.category).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
+			result, err := categoryService.CreateCategory(ctx, tc.category)
 
-			result, err := categoryService.CreateCategory(ctx, tt.category)
-			if tt.wantErr != nil {
+			if tc.wantErr != nil {
 				assert.Error(t, err)
-				assert.Equal(t, tt.wantErr, err)
+				assert.Equal(t, tc.wantErr, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantResult, result)
+				assert.Equal(t, tc.wantResult, result)
 				mockRepo.AssertExpectations(t)
 			}
 		})
@@ -132,20 +132,20 @@ func TestCategoryService_GetCategory(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("Get", ctx, tt.categoryID).Return(tt.wantResult, tt.wantErr)
+			mockRepo.On("Get", ctx, tc.categoryID).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
+			result, err := categoryService.GetCategory(ctx, tc.categoryID)
 
-			result, err := categoryService.GetCategory(ctx, tt.categoryID)
-			if tt.wantErr != nil {
+			if tc.wantErr != nil {
 				assert.Error(t, err)
-				assert.Equal(t, tt.wantErr, err)
+				assert.Equal(t, tc.wantErr, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantResult, result)
+				assert.Equal(t, tc.wantResult, result)
 				mockRepo.AssertExpectations(t)
 			}
 		})
@@ -177,20 +177,20 @@ func TestCategoryService_GetAllCategories(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("GetAll", ctx).Return(tt.wantResult, tt.wantErr)
+			mockRepo.On("GetAll", ctx).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
-
 			result, err := categoryService.GetAllCategories(ctx)
-			if tt.wantErr != nil {
+
+			if tc.wantErr != nil {
 				assert.Error(t, err)
-				assert.Equal(t, tt.wantErr, err)
+				assert.Equal(t, tc.wantErr, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantResult, result)
+				assert.Equal(t, tc.wantResult, result)
 				mockRepo.AssertExpectations(t)
 			}
 		})
@@ -232,20 +232,20 @@ func TestCategoryService_UpdateCategory(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("Update", ctx, tt.category).Return(tt.wantResult, tt.wantErr)
+			mockRepo.On("Update", ctx, tc.category).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
+			result, err := categoryService.UpdateCategory(ctx, tc.category)
 
-			result, err := categoryService.UpdateCategory(ctx, tt.category)
-			if tt.wantErr != nil {
+			if tc.wantErr != nil {
 				assert.Error(t, err)
-				assert.Equal(t, tt.wantErr, err)
+				assert.Equal(t, tc.wantErr, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantResult, result)
+				assert.Equal(t, tc.wantResult, result)
 				mockRepo.AssertExpectations(t)
 			}
 		})
@@ -277,17 +277,17 @@ func TestCategoryService_DeleteCategory(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("Delete", ctx, tt.categoryID).Return(tt.wantErr)
+			mockRepo.On("Delete", ctx, tc.categoryID).Return(tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
+			err := categoryService.DeleteCategory(ctx, tc.categoryID)
 
-			err := categoryService.DeleteCategory(ctx, tt.categoryID)
-			if tt.wantErr != nil {
+			if tc.wantErr != nil {
 				assert.Error(t, err)
-				assert.Equal(t, tt.wantErr, err)
+				assert.Equal(t, tc.wantErr, err)
 			} else {
 				assert.NoError(t, err)
 				mockRepo.AssertExpectations(t)
