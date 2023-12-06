@@ -1,6 +1,6 @@
 package category_handler
 
-import "git.home/alex/go-subscriptions/internal/domain/category/entity"
+import "git.home/alex/go-subscriptions/internal/domain/entity"
 
 type CategoryDTO struct {
 	ID   uint   `json:"id"`

@@ -1,18 +1,17 @@
 package factory
 
 import (
-	categoryrepositoryinterface "git.home/alex/go-subscriptions/internal/domain/category/repository"
-	currencyrepositoryinterface "git.home/alex/go-subscriptions/internal/domain/currency/repository"
-	cyclerepositoryinterface "git.home/alex/go-subscriptions/internal/domain/cycle/repository"
-	subscriptionrepositoryinterface "git.home/alex/go-subscriptions/internal/domain/subscription/repository"
+	"errors"
+
+	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
 )
 
 type RepositoryFactory struct {
-	CategoryRepository     categoryrepositoryinterface.CategoryRepository
-	CurrencyRepository     currencyrepositoryinterface.CurrencyRepository
-	CycleRepository        cyclerepositoryinterface.CycleRepository
-	SubscriptionRepository subscriptionrepositoryinterface.SubscriptionRepository
+	repository.CategoryRepository
+	repository.CurrencyRepository
+	repository.CycleRepository
+	repository.SubscriptionRepository
 }
 
 type RepositoryConfiguration func(rf *RepositoryFactory) error
@@ -38,5 +37,17 @@ func WithMemoryRepository() RepositoryConfiguration {
 		rf.CycleRepository = memory.NewCycleRepository()
 		rf.SubscriptionRepository = memory.NewSubscriptionRepository()
 		return nil
+	}
+}
+
+func WithRedisRepository() RepositoryConfiguration {
+	return func(rf *RepositoryFactory) error {
+		return errors.New("not implemented")
+	}
+}
+
+func WithSqliteRepository() RepositoryConfiguration {
+	return func(rf *RepositoryFactory) error {
+		return errors.New("not implemented")
 	}
 }

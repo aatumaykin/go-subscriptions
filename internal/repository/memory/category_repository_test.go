@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"git.home/alex/go-subscriptions/internal/domain/category/repository"
+	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
 
-	"git.home/alex/go-subscriptions/internal/domain/category/entity"
+	"git.home/alex/go-subscriptions/internal/domain/entity"
 )
 
 func TestCategoryRepository_Create(t *testing.T) {

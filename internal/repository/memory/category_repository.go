@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"git.home/alex/go-subscriptions/internal/domain/category/entity"
-	"git.home/alex/go-subscriptions/internal/domain/category/repository"
+	"git.home/alex/go-subscriptions/internal/domain/entity"
+	"git.home/alex/go-subscriptions/internal/domain/repository"
 )
 
 type CategoryRepository struct {

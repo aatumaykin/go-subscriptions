@@ -12,7 +12,7 @@ import (
 
 	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/health_handler"
-	categoryserviceinterface "git.home/alex/go-subscriptions/internal/domain/category/service"
+	"git.home/alex/go-subscriptions/internal/domain/service"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -111,9 +111,9 @@ func WithHealthHandler() Configuration {
 	}
 }
 
-func WithCategoryCollectionGetterHandler(collectionGetter categoryserviceinterface.CollectionGetter) Configuration {
+func WithCategoryCollectionGetterHandler(categoryService service.CategoryService) Configuration {
 	return func(s *HTTPServer) error {
-		s.router.GET("/api/categories", category_handler.CollectionGetterHandle(s.ctx, collectionGetter))
+		s.router.GET("/api/categories", category_handler.CollectionGetterHandle(s.ctx, categoryService))
 		return nil
 	}
 }

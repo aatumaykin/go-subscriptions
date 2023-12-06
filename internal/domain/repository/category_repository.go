@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"git.home/alex/go-subscriptions/internal/domain/category/entity"
+	"git.home/alex/go-subscriptions/internal/domain/entity"
 )
 
 var (

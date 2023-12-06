@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"git.home/alex/go-subscriptions/internal/domain/cycle/repository"
+	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
 
-	"git.home/alex/go-subscriptions/internal/domain/cycle/entity"
+	"git.home/alex/go-subscriptions/internal/domain/entity"
 )
 
 func TestCycleRepository_Create(t *testing.T) {

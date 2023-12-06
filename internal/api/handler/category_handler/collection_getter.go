@@ -6,13 +6,13 @@ import (
 
 	"git.home/alex/go-subscriptions/internal/api/api_response"
 	"git.home/alex/go-subscriptions/internal/api/handler/error_handler"
-	categoryserviceinterface "git.home/alex/go-subscriptions/internal/domain/category/service"
+	"git.home/alex/go-subscriptions/internal/domain/service"
 	"github.com/julienschmidt/httprouter"
 )
 
-func CollectionGetterHandle(ctx context.Context, collectionGetter categoryserviceinterface.CollectionGetter) httprouter.Handle {
+func CollectionGetterHandle(ctx context.Context, categoryService service.CategoryService) httprouter.Handle {
 	return func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-		categories, err := collectionGetter.GetAll(ctx)
+		categories, err := categoryService.GetAllCategories(ctx)
 		if err != nil {
 			error_handler.HandleError(w, err)
 

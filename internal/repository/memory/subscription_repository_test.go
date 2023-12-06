@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"git.home/alex/go-subscriptions/internal/domain/subscription/entity"
-	"git.home/alex/go-subscriptions/internal/domain/subscription/repository"
+	"git.home/alex/go-subscriptions/internal/domain/entity"
+	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
 )
 

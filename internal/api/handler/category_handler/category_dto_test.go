@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
-	"git.home/alex/go-subscriptions/internal/domain/category/entity"
+	"git.home/alex/go-subscriptions/internal/domain/entity"
 	"github.com/stretchr/testify/assert"
 )
 

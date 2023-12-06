@@ -1,22 +1,15 @@
 package factory
 
 import (
-	categoryserviceinterface "git.home/alex/go-subscriptions/internal/domain/category/service"
-	currencyserviceinterface "git.home/alex/go-subscriptions/internal/domain/currency/service"
-	cycleserviceinterface "git.home/alex/go-subscriptions/internal/domain/cycle/service"
-	subscriptionserviceinterface "git.home/alex/go-subscriptions/internal/domain/subscription/service"
-	"git.home/alex/go-subscriptions/internal/service/category"
-	"git.home/alex/go-subscriptions/internal/service/currency"
-	"git.home/alex/go-subscriptions/internal/service/cycle"
-	"git.home/alex/go-subscriptions/internal/service/subscription"
+	"git.home/alex/go-subscriptions/internal/domain/service"
 )
 
 type ServiceFactory struct {
-	repositoryFactory        *RepositoryFactory
-	CategoryCollectionGetter categoryserviceinterface.CollectionGetter
-	CurrencyService          currencyserviceinterface.CurrencyService
-	CycleService             cycleserviceinterface.CycleService
-	SubscriptionService      subscriptionserviceinterface.SubscriptionService
+	repositoryFactory *RepositoryFactory
+	*service.CategoryService
+	*service.CurrencyService
+	*service.CycleService
+	*service.SubscriptionService
 }
 
 type ServiceConfiguration func(sf *ServiceFactory) error
@@ -44,62 +37,28 @@ func WithRepositoryFactory(repositoryFactory *RepositoryFactory) ServiceConfigur
 
 func WithCategoryService() ServiceConfiguration {
 	return func(sf *ServiceFactory) error {
-		cs, err := category.NewCategoryService(
-			category.WithCategoryRepository(sf.repositoryFactory.CategoryRepository),
-			category.WithCreator(),
-			category.WithGetter(),
-			category.WithCollectionGetter(),
-			category.WithUpdater(),
-			category.WithDeleter(),
-		)
-		if err != nil {
-			return err
-		}
-
-		sf.CategoryCollectionGetter = cs.CollectionGetter
+		sf.CategoryService = service.NewCategoryService(sf.repositoryFactory.CategoryRepository)
 		return nil
 	}
 }
 
 func WithCurrencyService() ServiceConfiguration {
 	return func(sf *ServiceFactory) error {
-		cs, err := currency.NewCurrencyService(
-			currency.WithCurrencyRepository(sf.repositoryFactory.CurrencyRepository),
-		)
-		if err != nil {
-			return err
-		}
-
-		sf.CurrencyService = cs
+		sf.CurrencyService = service.NewCurrencyService(sf.repositoryFactory.CurrencyRepository)
 		return nil
 	}
 }
 
 func WithCycleService() ServiceConfiguration {
 	return func(sf *ServiceFactory) error {
-		cs, err := cycle.NewCycleService(
-			cycle.WithCycleRepository(sf.repositoryFactory.CycleRepository),
-		)
-		if err != nil {
-			return err
-		}
-
-		sf.CycleService = cs
+		sf.CycleService = service.NewCycleService(sf.repositoryFactory.CycleRepository)
 		return nil
 	}
 }
 
 func WithSubscriptionService() ServiceConfiguration {
 	return func(sf *ServiceFactory) error {
-		ss, err := subscription.NewSubscriptionService(
-			subscription.WithSubscriptionRepository(sf.repositoryFactory.SubscriptionRepository),
-		)
-		if err != nil {
-			return err
-		}
-
-		sf.SubscriptionService = ss
-
+		sf.SubscriptionService = service.NewSubscriptionService(sf.repositoryFactory.SubscriptionRepository)
 		return nil
 	}
 }
