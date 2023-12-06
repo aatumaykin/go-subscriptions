@@ -2,7 +2,6 @@ package memory
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
@@ -20,7 +19,7 @@ func NewSubscriptionRepository() *SubscriptionRepository {
 	}
 }
 
-func (r *SubscriptionRepository) Create(ctx context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
+func (r *SubscriptionRepository) Create(_ context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -30,19 +29,19 @@ func (r *SubscriptionRepository) Create(ctx context.Context, subscription entity
 	return &subscription, nil
 }
 
-func (r *SubscriptionRepository) Get(ctx context.Context, ID uint) (*entity.Subscription, error) {
+func (r *SubscriptionRepository) Get(_ context.Context, id uint) (*entity.Subscription, error) {
 	r.Lock()
 	defer r.Unlock()
 
-	subscription, ok := r.subscriptions[ID]
+	subscription, ok := r.subscriptions[id]
 	if !ok {
-		return nil, fmt.Errorf("subscription not found: %w", repository.ErrNotFoundSubscription)
+		return nil, repository.ErrNotFoundSubscription
 	}
 
 	return &subscription, nil
 }
 
-func (r *SubscriptionRepository) GetAll(ctx context.Context) (repository.Subscriptions, error) {
+func (r *SubscriptionRepository) GetAll(_ context.Context) (repository.Subscriptions, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -54,12 +53,12 @@ func (r *SubscriptionRepository) GetAll(ctx context.Context) (repository.Subscri
 	return subscriptions, nil
 }
 
-func (r *SubscriptionRepository) Update(ctx context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
+func (r *SubscriptionRepository) Update(_ context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
 	r.Lock()
 	defer r.Unlock()
 
 	if _, ok := r.subscriptions[subscription.ID]; !ok {
-		return nil, fmt.Errorf("subscription not found: %w", repository.ErrUpdateSubscription)
+		return nil, repository.ErrUpdateSubscription
 	}
 
 	r.subscriptions[subscription.ID] = subscription
@@ -67,15 +66,15 @@ func (r *SubscriptionRepository) Update(ctx context.Context, subscription entity
 	return &subscription, nil
 }
 
-func (r *SubscriptionRepository) Delete(ctx context.Context, ID uint) error {
+func (r *SubscriptionRepository) Delete(_ context.Context, id uint) error {
 	r.Lock()
 	defer r.Unlock()
 
-	if _, ok := r.subscriptions[ID]; !ok {
-		return fmt.Errorf("subscription not found: %w", repository.ErrDeleteSubscription)
+	if _, ok := r.subscriptions[id]; !ok {
+		return repository.ErrDeleteSubscription
 	}
 
-	delete(r.subscriptions, ID)
+	delete(r.subscriptions, id)
 
 	return nil
 }

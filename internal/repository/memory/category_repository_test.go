@@ -2,215 +2,233 @@ package memory_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
+	"git.home/alex/go-subscriptions/internal/domain/entity"
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
-
-	"git.home/alex/go-subscriptions/internal/domain/entity"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCategoryRepository_Create(t *testing.T) {
-	type testCase struct {
-		test        string
-		category    entity.Category
-		expectedErr error
-	}
-
-	testCases := []testCase{
+	testCases := []struct {
+		name       string
+		category   entity.Category
+		wantResult *entity.Category
+		wantErr    error
+	}{
 		{
-			test:        "Create a new category",
-			category:    entity.Category{Name: "Test Category"},
-			expectedErr: nil,
+			name:       "Create a new category",
+			category:   entity.Category{Name: "Test Category"},
+			wantResult: &entity.Category{ID: 1, Name: "Test Category"},
+			wantErr:    nil,
 		},
 		{
-			test:        "Create a new category",
-			category:    entity.Category{ID: 1, Name: "Test Category"},
-			expectedErr: nil,
+			name:       "Create a new category",
+			category:   entity.Category{Name: "Test Category 2"},
+			wantResult: &entity.Category{ID: 2, Name: "Test Category 2"},
+			wantErr:    nil,
 		},
 	}
 
 	repo := memory.NewCategoryRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			createdCategory, err := repo.Create(context.Background(), tc.category)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := repo.Create(ctx, tc.category)
 
-			if createdCategory != nil {
-				found, err := repo.Get(context.Background(), createdCategory.ID)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if createdCategory.Name != found.Name {
-					t.Errorf("Expected %v, got %v", createdCategory.Name, found.Name)
-				}
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantResult, result)
 			}
 		})
 	}
 }
 
 func TestCategoryRepository_Get(t *testing.T) {
-	type testCase struct {
-		test        string
-		category    entity.Category
-		expectedID  uint
-		expectedErr error
-	}
-
-	testCases := []testCase{
+	testCases := []struct {
+		name     string
+		category entity.Category
+		id       uint
+		wantErr  error
+	}{
 		{
-			test:        "Get an existing category",
-			category:    entity.Category{Name: "Test Category"},
-			expectedID:  1,
-			expectedErr: nil,
+			name:     "Get an existing category",
+			category: entity.Category{Name: "Test Category"},
+			id:       1,
+			wantErr:  nil,
 		},
 		{
-			test:        "Get a non-existing category",
-			category:    entity.Category{Name: "Test Category"},
-			expectedID:  3,
-			expectedErr: repository.ErrNotFoundCategory,
+			name:     "Get an existing category",
+			category: entity.Category{Name: "Test Category 2"},
+			id:       2,
+			wantErr:  nil,
+		},
+		{
+			name:     "Get a non-existing category",
+			category: entity.Category{Name: "Test Category"},
+			id:       10,
+			wantErr:  repository.ErrNotFoundCategory,
 		},
 	}
 
 	repo := memory.NewCategoryRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			_, err := repo.Create(context.Background(), tc.category)
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			createdCategory, err := repo.Create(ctx, tc.category)
+			assert.NoError(t, err)
 
-			_, err = repo.Get(context.Background(), tc.expectedID)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
+			foundCategory, err := repo.Get(ctx, tc.id)
+
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, createdCategory, foundCategory)
 			}
 		})
 	}
 }
 
 func TestCategoryRepository_GetAll(t *testing.T) {
-	type testCase struct {
-		test        string
-		categories  []entity.Category
+	testCases := []struct {
+		name        string
+		categories  repository.Categories
+		wantResult  repository.Categories
 		expectedLen int
-	}
-
-	testCases := []testCase{
+	}{
 		{
-			test:        "Empty repository",
+			name:        "Empty repository",
 			expectedLen: 0,
 		},
 		{
-			test:        "Get all categories",
-			categories:  []entity.Category{{Name: "Category 1"}, {Name: "Category 2"}},
+			name:        "Get all categories",
+			categories:  repository.Categories{{Name: "Category 1"}, {Name: "Category 2"}},
+			wantResult:  repository.Categories{{ID: 1, Name: "Category 1"}, {ID: 2, Name: "Category 2"}},
 			expectedLen: 2,
 		},
 	}
 
 	repo := memory.NewCategoryRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			for _, category := range tc.categories {
-				_, err := repo.Create(context.Background(), category)
-				if err != nil {
-					t.Fatal(err)
-				}
+				_, err := repo.Create(ctx, category)
+				assert.NoError(t, err)
 			}
 
-			categories, _ := repo.GetAll(context.Background())
-			if len(categories) != tc.expectedLen {
-				t.Errorf("Expected %d categories, got %d", tc.expectedLen, len(categories))
-			}
+			categories, err := repo.GetAll(ctx)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.wantResult, categories)
+			assert.Equal(t, tc.expectedLen, len(categories))
 		})
 	}
 }
 
 func TestCategoryRepository_Update(t *testing.T) {
-	type testCase struct {
-		test            string
+	testCases := []struct {
+		name            string
 		initialCategory entity.Category
 		updatedCategory entity.Category
-		expectedErr     error
-	}
-
-	testCases := []testCase{
+		wantResult      *entity.Category
+		wantErr         error
+	}{
 		{
-			test:            "Update an existing category",
+			name:            "Update an existing category",
 			initialCategory: entity.Category{Name: "Category 1"},
 			updatedCategory: entity.Category{ID: 1, Name: "Updated Category"},
-			expectedErr:     nil,
+			wantResult:      &entity.Category{ID: 1, Name: "Updated Category"},
+			wantErr:         nil,
 		},
 		{
-			test:            "Update a non-existing category",
+			name:            "Update an existing category",
 			initialCategory: entity.Category{Name: "Category 2"},
-			updatedCategory: entity.Category{ID: 3, Name: "Updated Category"},
-			expectedErr:     repository.ErrUpdateCategory,
+			updatedCategory: entity.Category{ID: 2, Name: "Updated Category 2"},
+			wantResult:      &entity.Category{ID: 2, Name: "Updated Category 2"},
+			wantErr:         nil,
+		},
+		{
+			name:            "Update a non-existing category",
+			initialCategory: entity.Category{Name: "Category 3"},
+			updatedCategory: entity.Category{ID: 10, Name: "Updated Category 2"},
+			wantResult:      nil,
+			wantErr:         repository.ErrUpdateCategory,
 		},
 	}
 
 	repo := memory.NewCategoryRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			_, err := repo.Create(context.Background(), tc.initialCategory)
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := repo.Create(ctx, tc.initialCategory)
+			assert.NoError(t, err)
 
-			updatedCategory, err := repo.Update(context.Background(), tc.updatedCategory)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
+			result, err := repo.Update(ctx, tc.updatedCategory)
 
-			if updatedCategory != nil {
-				found, err := repo.Get(context.Background(), updatedCategory.ID)
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				if found.Name != updatedCategory.Name {
-					t.Errorf("Expected %v, got %v", updatedCategory.Name, found.Name)
-				}
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantResult, result)
 			}
 		})
 	}
 }
 
 func TestCategoryRepository_Delete(t *testing.T) {
-	repo := memory.NewCategoryRepository()
+	testCases := []struct {
+		name     string
+		category entity.Category
+		id       uint
+		wantErr  error
+	}{
+		{
+			name:     "Delete an existing category",
+			category: entity.Category{Name: "Category 1"},
+			id:       1,
+			wantErr:  nil,
+		},
+		{
+			name:     "Delete an existing category",
+			category: entity.Category{Name: "Category 2"},
+			id:       1,
+			wantErr:  nil,
+		},
+		{
+			name:     "Delete a non-existing category",
+			category: entity.Category{Name: "Category 3"},
+			id:       10,
+			wantErr:  repository.ErrDeleteCategory,
+		},
+	}
 
+	repo := memory.NewCategoryRepository()
 	ctx := context.Background()
 
-	t.Run("Non-existing category", func(t *testing.T) {
-		err := repo.Delete(ctx, 3)
-		if err == nil {
-			t.Error("Expected error, got nil")
-		}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := repo.Create(ctx, tc.category)
+			assert.NoError(t, err)
 
-		if !errors.Is(err, repository.ErrDeleteCategory) {
-			t.Errorf("Expected error: %v, got: %v", repository.ErrDeleteCategory, err)
-		}
-	})
+			err = repo.Delete(ctx, tc.id)
 
-	t.Run("Existing category", func(t *testing.T) {
-		_, err := repo.Create(context.Background(), entity.Category{Name: "Category 1"})
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		err = repo.Delete(ctx, 1)
-		if err != nil {
-			t.Errorf("Expected no error, got: %v", err)
-		}
-
-		if _, err := repo.Get(context.Background(), 1); err == nil {
-			t.Errorf("Expected category to be deleted")
-		}
-	})
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

@@ -28,12 +28,12 @@ func (s *CycleService) CreateCycle(ctx context.Context, cycle entity.Cycle) (*en
 	return s.repo.Create(ctx, cycle)
 }
 
-func (s *CycleService) GetCycle(ctx context.Context, ID uint) (*entity.Cycle, error) {
-	if ID == 0 {
+func (s *CycleService) GetCycle(ctx context.Context, id uint) (*entity.Cycle, error) {
+	if id == 0 {
 		return nil, repository.ErrNotFoundCycle
 	}
 
-	return s.repo.Get(ctx, ID)
+	return s.repo.Get(ctx, id)
 }
 
 func (s *CycleService) GetAllCycles(ctx context.Context) (repository.Cycles, error) {
@@ -48,10 +48,10 @@ func (s *CycleService) UpdateCycle(ctx context.Context, cycle entity.Cycle) (*en
 	return s.repo.Update(ctx, cycle)
 }
 
-func (s *CycleService) DeleteCycle(ctx context.Context, ID uint) error {
-	if ID == 0 {
+func (s *CycleService) DeleteCycle(ctx context.Context, id uint) error {
+	if id == 0 {
 		return repository.ErrNotFoundCycle
 	}
 
-	return s.repo.Delete(ctx, ID)
+	return s.repo.Delete(ctx, id)
 }

@@ -32,8 +32,8 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, subscripti
 	return s.repo.Create(ctx, subscription)
 }
 
-func (s *SubscriptionService) GetSubscription(ctx context.Context, ID uint) (*entity.Subscription, error) {
-	return s.repo.Get(ctx, ID)
+func (s *SubscriptionService) GetSubscription(ctx context.Context, id uint) (*entity.Subscription, error) {
+	return s.repo.Get(ctx, id)
 }
 
 func (s *SubscriptionService) GetAllSubscriptions(ctx context.Context) (repository.Subscriptions, error) {
@@ -52,6 +52,6 @@ func (s *SubscriptionService) UpdateSubscription(ctx context.Context, subscripti
 	return s.repo.Update(ctx, subscription)
 }
 
-func (s *SubscriptionService) DeleteSubscription(ctx context.Context, ID uint) error {
-	return s.repo.Delete(ctx, ID)
+func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id uint) error {
+	return s.repo.Delete(ctx, id)
 }

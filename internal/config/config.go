@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	_ "github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {

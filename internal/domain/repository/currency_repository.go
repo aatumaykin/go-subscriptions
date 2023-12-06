@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	ErrNotFoundCurrency = errors.New("the currency was not found in the repository")
-	ErrCreateCurrency   = errors.New("failed to add the currency to the repository")
-	ErrUpdateCurrency   = errors.New("failed to update the currency in the repository")
-	ErrDeleteCurrency   = errors.New("failed to delete the currency from the repository")
+	ErrNotFoundCurrency      = errors.New("the currency was not found in the repository")
+	ErrCreateCurrency        = errors.New("failed to add the currency to the repository")
+	ErrUpdateCurrency        = errors.New("failed to update the currency in the repository")
+	ErrDeleteCurrency        = errors.New("failed to delete the currency from the repository")
+	ErrAlreadyExistsCurrency = errors.New("currency already exists")
 )
 
 type Currencies []entity.Currency

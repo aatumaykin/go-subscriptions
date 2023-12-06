@@ -2,57 +2,15 @@ package service_test
 
 import (
 	"context"
-	"errors"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/domain/service"
+	"git.home/alex/go-subscriptions/tests"
+	"git.home/alex/go-subscriptions/tests/mock_repository"
+	"github.com/stretchr/testify/assert"
 )
-
-type MockCategoryRepository struct {
-	mock.Mock
-}
-
-func (m *MockCategoryRepository) Create(ctx context.Context, category entity.Category) (*entity.Category, error) {
-	args := m.Called(ctx, category)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Category), args.Error(1)
-}
-
-func (m *MockCategoryRepository) Get(ctx context.Context, ID uint) (*entity.Category, error) {
-	args := m.Called(ctx, ID)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Category), args.Error(1)
-}
-
-func (m *MockCategoryRepository) GetAll(ctx context.Context) (repository.Categories, error) {
-	args := m.Called(ctx)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(repository.Categories), args.Error(1)
-}
-
-func (m *MockCategoryRepository) Update(ctx context.Context, category entity.Category) (*entity.Category, error) {
-	args := m.Called(ctx, category)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Category), args.Error(1)
-}
-
-func (m *MockCategoryRepository) Delete(ctx context.Context, ID uint) error {
-	args := m.Called(ctx, ID)
-	return args.Error(0)
-}
 
 func TestCategoryService_CreateCategory(t *testing.T) {
 	testCases := []struct {
@@ -76,7 +34,7 @@ func TestCategoryService_CreateCategory(t *testing.T) {
 		{
 			name:       "Test error",
 			category:   entity.Category{Name: "Test Category"},
-			wantErr:    errors.New("some error"),
+			wantErr:    tests.ErrTest,
 			wantResult: nil,
 		},
 	}
@@ -85,7 +43,7 @@ func TestCategoryService_CreateCategory(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockCategoryRepository)
+			mockRepo := new(mock_repository.MockCategoryRepository)
 			mockRepo.On("Create", ctx, tc.category).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
@@ -125,7 +83,7 @@ func TestCategoryService_GetCategory(t *testing.T) {
 		{
 			name:       "Test error",
 			id:         1,
-			wantErr:    errors.New("some error"),
+			wantErr:    tests.ErrTest,
 			wantResult: nil,
 		},
 	}
@@ -134,7 +92,7 @@ func TestCategoryService_GetCategory(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockCategoryRepository)
+			mockRepo := new(mock_repository.MockCategoryRepository)
 			mockRepo.On("Get", ctx, tc.id).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
@@ -170,7 +128,7 @@ func TestCategoryService_GetAllCategories(t *testing.T) {
 		},
 		{
 			name:       "Test error",
-			wantErr:    errors.New("some error"),
+			wantErr:    tests.ErrTest,
 			wantResult: nil,
 		},
 	}
@@ -179,7 +137,7 @@ func TestCategoryService_GetAllCategories(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockCategoryRepository)
+			mockRepo := new(mock_repository.MockCategoryRepository)
 			mockRepo.On("GetAll", ctx).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
@@ -225,7 +183,7 @@ func TestCategoryService_UpdateCategory(t *testing.T) {
 		{
 			name:       "Test error",
 			category:   entity.Category{ID: 1, Name: "Test Category"},
-			wantErr:    errors.New("some error"),
+			wantErr:    tests.ErrTest,
 			wantResult: nil,
 		},
 	}
@@ -234,7 +192,7 @@ func TestCategoryService_UpdateCategory(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockCategoryRepository)
+			mockRepo := new(mock_repository.MockCategoryRepository)
 			mockRepo.On("Update", ctx, tc.category).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
@@ -271,7 +229,7 @@ func TestCategoryService_DeleteCategory(t *testing.T) {
 		{
 			name:    "Test error",
 			id:      1,
-			wantErr: errors.New("some error"),
+			wantErr: tests.ErrTest,
 		},
 	}
 
@@ -279,7 +237,7 @@ func TestCategoryService_DeleteCategory(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockCategoryRepository)
+			mockRepo := new(mock_repository.MockCategoryRepository)
 			mockRepo.On("Delete", ctx, tc.id).Return(tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)

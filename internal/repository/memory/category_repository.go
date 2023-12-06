@@ -2,7 +2,6 @@ package memory
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
@@ -20,7 +19,7 @@ func NewCategoryRepository() *CategoryRepository {
 	}
 }
 
-func (r *CategoryRepository) Create(ctx context.Context, category entity.Category) (*entity.Category, error) {
+func (r *CategoryRepository) Create(_ context.Context, category entity.Category) (*entity.Category, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -30,19 +29,19 @@ func (r *CategoryRepository) Create(ctx context.Context, category entity.Categor
 	return &category, nil
 }
 
-func (r *CategoryRepository) Get(ctx context.Context, ID uint) (*entity.Category, error) {
+func (r *CategoryRepository) Get(_ context.Context, id uint) (*entity.Category, error) {
 	r.Lock()
 	defer r.Unlock()
 
-	category, ok := r.categories[ID]
+	category, ok := r.categories[id]
 	if !ok {
-		return nil, fmt.Errorf("category not found: %w", repository.ErrNotFoundCategory)
+		return nil, repository.ErrNotFoundCategory
 	}
 
 	return &category, nil
 }
 
-func (r *CategoryRepository) GetAll(ctx context.Context) (repository.Categories, error) {
+func (r *CategoryRepository) GetAll(_ context.Context) (repository.Categories, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -54,12 +53,12 @@ func (r *CategoryRepository) GetAll(ctx context.Context) (repository.Categories,
 	return categories, nil
 }
 
-func (r *CategoryRepository) Update(ctx context.Context, category entity.Category) (*entity.Category, error) {
+func (r *CategoryRepository) Update(_ context.Context, category entity.Category) (*entity.Category, error) {
 	r.Lock()
 	defer r.Unlock()
 
 	if _, ok := r.categories[category.ID]; !ok {
-		return nil, fmt.Errorf("category not found: %w", repository.ErrUpdateCategory)
+		return nil, repository.ErrUpdateCategory
 	}
 
 	r.categories[category.ID] = category
@@ -67,15 +66,15 @@ func (r *CategoryRepository) Update(ctx context.Context, category entity.Categor
 	return &category, nil
 }
 
-func (r *CategoryRepository) Delete(ctx context.Context, ID uint) error {
+func (r *CategoryRepository) Delete(_ context.Context, id uint) error {
 	r.Lock()
 	defer r.Unlock()
 
-	if _, ok := r.categories[ID]; !ok {
-		return fmt.Errorf("category not found: %w", repository.ErrDeleteCategory)
+	if _, ok := r.categories[id]; !ok {
+		return repository.ErrDeleteCategory
 	}
 
-	delete(r.categories, ID)
+	delete(r.categories, id)
 
 	return nil
 }

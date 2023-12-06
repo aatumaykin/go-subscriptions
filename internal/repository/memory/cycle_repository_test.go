@@ -2,52 +2,49 @@ package memory_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
+	"github.com/stretchr/testify/assert"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
 )
 
 func TestCycleRepository_Create(t *testing.T) {
-	type testCase struct {
-		test        string
-		cycle       entity.Cycle
-		expectedErr error
-	}
-
-	testCases := []testCase{
+	testCases := []struct {
+		name       string
+		cycle      entity.Cycle
+		wantResult *entity.Cycle
+		wantErr    error
+	}{
 		{
-			test:        "Create a new cycle",
-			cycle:       entity.Cycle{Name: "Test Cycle"},
-			expectedErr: nil,
+			name:       "Create a new cycle",
+			cycle:      entity.Cycle{Name: "Test Cycle"},
+			wantResult: &entity.Cycle{ID: 1, Name: "Test Cycle"},
+			wantErr:    nil,
 		},
 		{
-			test:        "Create a new cycle",
-			cycle:       entity.Cycle{ID: 1, Name: "Test Cycle"},
-			expectedErr: nil,
+			name:       "Create a new cycle",
+			cycle:      entity.Cycle{Name: "Test Cycle"},
+			wantResult: &entity.Cycle{ID: 2, Name: "Test Cycle"},
+			wantErr:    nil,
 		},
 	}
 
 	repo := memory.NewCycleRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			createdCycle, err := repo.Create(context.Background(), tc.cycle)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := repo.Create(ctx, tc.cycle)
 
-			if createdCycle != nil {
-				found, err := repo.Get(context.Background(), createdCycle.ID)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if createdCycle.Name != found.Name {
-					t.Errorf("Expected %v, got %v", createdCycle.Name, found.Name)
-				}
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantResult, result)
 			}
 		})
 	}
@@ -55,162 +52,185 @@ func TestCycleRepository_Create(t *testing.T) {
 
 func TestCycleRepository_Get(t *testing.T) {
 	type testCase struct {
-		test        string
-		cycle       entity.Cycle
-		expectedID  uint
-		expectedErr error
+		name    string
+		cycle   entity.Cycle
+		id      uint
+		wantErr error
 	}
 
 	testCases := []testCase{
 		{
-			test:        "Get an existing cycle",
-			cycle:       entity.Cycle{Name: "Test Cycle"},
-			expectedID:  1,
-			expectedErr: nil,
+			name:    "Get an existing cycle",
+			cycle:   entity.Cycle{Name: "Test Cycle"},
+			id:      1,
+			wantErr: nil,
 		},
 		{
-			test:        "Get a non-existing cycle",
-			cycle:       entity.Cycle{Name: "Test Cycle"},
-			expectedID:  3,
-			expectedErr: repository.ErrNotFoundCycle,
+			name:    "Get an existing cycle",
+			cycle:   entity.Cycle{Name: "Test Cycle"},
+			id:      2,
+			wantErr: nil,
+		},
+		{
+			name:    "Get a non-existing cycle",
+			cycle:   entity.Cycle{Name: "Test Cycle"},
+			id:      10,
+			wantErr: repository.ErrNotFoundCycle,
 		},
 	}
 
 	repo := memory.NewCycleRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			_, err := repo.Create(context.Background(), tc.cycle)
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			createdCycle, err := repo.Create(ctx, tc.cycle)
+			assert.NoError(t, err)
 
-			_, err = repo.Get(context.Background(), tc.expectedID)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
+			foundCycle, err := repo.Get(ctx, tc.id)
+
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, createdCycle, foundCycle)
 			}
 		})
 	}
 }
 
 func TestCycleRepository_GetAll(t *testing.T) {
-	type testCase struct {
-		test        string
-		categories  []entity.Cycle
+	testCases := []struct {
+		name        string
+		cycles      repository.Cycles
+		wantResult  repository.Cycles
 		expectedLen int
-	}
-
-	testCases := []testCase{
+	}{
 		{
-			test:        "Empty repository",
+			name:        "Empty repository",
 			expectedLen: 0,
 		},
 		{
-			test:        "Get all categories",
-			categories:  []entity.Cycle{{Name: "Cycle 1"}, {Name: "Cycle 2"}},
+			name:        "Get all categories",
+			cycles:      repository.Cycles{{Name: "Cycle 1"}, {Name: "Cycle 2"}},
+			wantResult:  repository.Cycles{{ID: 1, Name: "Cycle 1"}, {ID: 2, Name: "Cycle 2"}},
 			expectedLen: 2,
 		},
 	}
 
 	repo := memory.NewCycleRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			for _, cycle := range tc.categories {
-				_, err := repo.Create(context.Background(), cycle)
-				if err != nil {
-					t.Fatal(err)
-				}
+		t.Run(tc.name, func(t *testing.T) {
+			for _, cycle := range tc.cycles {
+				_, err := repo.Create(ctx, cycle)
+				assert.NoError(t, err)
 			}
 
-			categories, _ := repo.GetAll(context.Background())
-			if len(categories) != tc.expectedLen {
-				t.Errorf("Expected %d categories, got %d", tc.expectedLen, len(categories))
-			}
+			cycles, err := repo.GetAll(ctx)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.wantResult, cycles)
+			assert.Equal(t, tc.expectedLen, len(cycles))
 		})
 	}
 }
 
 func TestCycleRepository_Update(t *testing.T) {
-	type testCase struct {
-		test         string
+	testCases := []struct {
+		name         string
 		initialCycle entity.Cycle
 		updatedCycle entity.Cycle
-		expectedErr  error
-	}
-
-	testCases := []testCase{
+		wantResult   *entity.Cycle
+		wantErr      error
+	}{
 		{
-			test:         "Update an existing cycle",
+			name:         "Update an existing cycle",
 			initialCycle: entity.Cycle{Name: "Cycle 1"},
 			updatedCycle: entity.Cycle{ID: 1, Name: "Updated Cycle"},
-			expectedErr:  nil,
+			wantResult:   &entity.Cycle{ID: 1, Name: "Updated Cycle"},
+			wantErr:      nil,
 		},
 		{
-			test:         "Update a non-existing cycle",
+			name:         "Update an existing cycle",
 			initialCycle: entity.Cycle{Name: "Cycle 2"},
-			updatedCycle: entity.Cycle{ID: 3, Name: "Updated Cycle"},
-			expectedErr:  repository.ErrUpdateCycle,
+			updatedCycle: entity.Cycle{ID: 2, Name: "Updated Cycle"},
+			wantResult:   &entity.Cycle{ID: 2, Name: "Updated Cycle"},
+			wantErr:      nil,
+		},
+		{
+			name:         "Update a non-existing cycle",
+			initialCycle: entity.Cycle{Name: "Cycle 2"},
+			updatedCycle: entity.Cycle{ID: 10, Name: "Updated Cycle"},
+			wantErr:      repository.ErrUpdateCycle,
 		},
 	}
 
 	repo := memory.NewCycleRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			_, err := repo.Create(context.Background(), tc.initialCycle)
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := repo.Create(ctx, tc.initialCycle)
+			assert.NoError(t, err)
 
-			updatedCycle, err := repo.Update(context.Background(), tc.updatedCycle)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
+			result, err := repo.Update(ctx, tc.updatedCycle)
 
-			if err == nil {
-				found, err := repo.Get(context.Background(), updatedCycle.ID)
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				if found.Name != updatedCycle.Name {
-					t.Errorf("Expected %v, got %v", updatedCycle.Name, found.Name)
-				}
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantResult, result)
 			}
 		})
 	}
 }
 
 func TestCycleRepository_Delete(t *testing.T) {
-	repo := memory.NewCycleRepository()
+	testCases := []struct {
+		name    string
+		cycle   entity.Cycle
+		id      uint
+		wantErr error
+	}{
+		{
+			name:    "Delete an existing cycle",
+			cycle:   entity.Cycle{Name: "Test Cycle"},
+			id:      1,
+			wantErr: nil,
+		},
+		{
+			name:    "Delete an existing cycle",
+			cycle:   entity.Cycle{Name: "Test Cycle 2"},
+			id:      1,
+			wantErr: nil,
+		},
+		{
+			name:    "Delete a non-existing cycle",
+			cycle:   entity.Cycle{Name: "Test Cycle 3"},
+			id:      10,
+			wantErr: repository.ErrDeleteCycle,
+		},
+	}
 
+	repo := memory.NewCycleRepository()
 	ctx := context.Background()
 
-	t.Run("Non-existing cycle", func(t *testing.T) {
-		err := repo.Delete(ctx, 3)
-		if err == nil {
-			t.Error("Expected error, got nil")
-		}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := repo.Create(ctx, tc.cycle)
+			assert.NoError(t, err)
 
-		if !errors.Is(err, repository.ErrDeleteCycle) {
-			t.Errorf("Expected error: %v, got: %v", repository.ErrDeleteCycle, err)
-		}
-	})
+			err = repo.Delete(ctx, tc.id)
 
-	t.Run("Existing cycle", func(t *testing.T) {
-		_, err := repo.Create(context.Background(), entity.Cycle{Name: "Cycle 1"})
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		err = repo.Delete(ctx, 1)
-		if err != nil {
-			t.Errorf("Expected no error, got: %v", err)
-		}
-
-		if _, err := repo.Get(context.Background(), 1); err == nil {
-			t.Errorf("Expected cycle to be deleted")
-		}
-	})
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

@@ -30,12 +30,12 @@ func (s *CategoryService) CreateCategory(ctx context.Context, category entity.Ca
 	return s.repo.Create(ctx, category)
 }
 
-func (s *CategoryService) GetCategory(ctx context.Context, ID uint) (*entity.Category, error) {
-	if ID == 0 {
+func (s *CategoryService) GetCategory(ctx context.Context, id uint) (*entity.Category, error) {
+	if id == 0 {
 		return nil, repository.ErrNotFoundCategory
 	}
 
-	return s.repo.Get(ctx, ID)
+	return s.repo.Get(ctx, id)
 }
 
 func (s *CategoryService) GetAllCategories(ctx context.Context) (repository.Categories, error) {
@@ -50,10 +50,10 @@ func (s *CategoryService) UpdateCategory(ctx context.Context, category entity.Ca
 	return s.repo.Update(ctx, category)
 }
 
-func (s *CategoryService) DeleteCategory(ctx context.Context, ID uint) error {
-	if ID == 0 {
+func (s *CategoryService) DeleteCategory(ctx context.Context, id uint) error {
+	if id == 0 {
 		return repository.ErrNotFoundCategory
 	}
 
-	return s.repo.Delete(ctx, ID)
+	return s.repo.Delete(ctx, id)
 }

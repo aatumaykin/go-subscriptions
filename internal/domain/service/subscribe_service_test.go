@@ -7,50 +7,9 @@ import (
 	"git.home/alex/go-subscriptions/internal/domain/entity"
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/domain/service"
+	"git.home/alex/go-subscriptions/tests/mock_repository"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
-
-type MockSubscriptionRepository struct {
-	mock.Mock
-}
-
-func (m *MockSubscriptionRepository) Create(ctx context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
-	args := m.Called(ctx, subscription)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Subscription), args.Error(1)
-}
-
-func (m *MockSubscriptionRepository) Get(ctx context.Context, ID uint) (*entity.Subscription, error) {
-	args := m.Called(ctx, ID)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Subscription), args.Error(1)
-}
-
-func (m *MockSubscriptionRepository) GetAll(ctx context.Context) (repository.Subscriptions, error) {
-	args := m.Called(ctx)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(repository.Subscriptions), args.Error(1)
-}
-
-func (m *MockSubscriptionRepository) Update(ctx context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
-	args := m.Called(ctx, subscription)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Subscription), args.Error(1)
-}
-
-func (m *MockSubscriptionRepository) Delete(ctx context.Context, ID uint) error {
-	args := m.Called(ctx, ID)
-	return args.Error(0)
-}
 
 func TestSubscriptionService_CreateSubscription(t *testing.T) {
 	testCases := []struct {
@@ -163,7 +122,7 @@ func TestSubscriptionService_CreateSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockSubscriptionRepository)
+			mockRepo := new(mock_repository.MockSubscriptionRepository)
 			mockRepo.On("Create", ctx, tc.subscription).Return(tc.wantResult, tc.wantErr)
 
 			subscriptionService := service.NewSubscriptionService(mockRepo)
@@ -212,7 +171,7 @@ func TestSubscriptionService_GetSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockSubscriptionRepository)
+			mockRepo := new(mock_repository.MockSubscriptionRepository)
 			mockRepo.On("Get", ctx, tc.id).Return(tc.wantResult, tc.wantErr)
 
 			subscriptionService := service.NewSubscriptionService(mockRepo)
@@ -257,7 +216,7 @@ func TestSubscriptionService_GetAllSubscriptions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockSubscriptionRepository)
+			mockRepo := new(mock_repository.MockSubscriptionRepository)
 			mockRepo.On("GetAll", ctx).Return(tc.wantResult, tc.wantErr)
 
 			subscriptionService := service.NewSubscriptionService(mockRepo)
@@ -344,7 +303,7 @@ func TestSubscriptionService_UpdateSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockSubscriptionRepository)
+			mockRepo := new(mock_repository.MockSubscriptionRepository)
 			mockRepo.On("Update", ctx, tc.subscription).Return(tc.wantResult, tc.wantErr)
 
 			subscriptionService := service.NewSubscriptionService(mockRepo)
@@ -389,7 +348,7 @@ func TestSubscriptionService_DeleteSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(MockSubscriptionRepository)
+			mockRepo := new(mock_repository.MockSubscriptionRepository)
 			mockRepo.On("Delete", ctx, tc.id).Return(tc.wantErr)
 
 			subscriptionService := service.NewSubscriptionService(mockRepo)

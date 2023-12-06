@@ -2,7 +2,6 @@ package memory
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
@@ -20,12 +19,12 @@ func NewCurrencyRepository() *CurrencyRepository {
 	}
 }
 
-func (r *CurrencyRepository) Create(ctx context.Context, currency entity.Currency) (*entity.Currency, error) {
+func (r *CurrencyRepository) Create(_ context.Context, currency entity.Currency) (*entity.Currency, error) {
 	r.Lock()
 	defer r.Unlock()
 
 	if _, ok := r.currencies[currency.Code]; ok {
-		return nil, fmt.Errorf("currency already exists: %w", repository.ErrCreateCurrency)
+		return nil, repository.ErrAlreadyExistsCurrency
 	}
 
 	r.currencies[currency.Code] = currency
@@ -33,7 +32,7 @@ func (r *CurrencyRepository) Create(ctx context.Context, currency entity.Currenc
 	return &currency, nil
 }
 
-func (r *CurrencyRepository) Get(ctx context.Context, code string) (*entity.Currency, error) {
+func (r *CurrencyRepository) Get(_ context.Context, code string) (*entity.Currency, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -44,7 +43,7 @@ func (r *CurrencyRepository) Get(ctx context.Context, code string) (*entity.Curr
 	return nil, repository.ErrNotFoundCurrency
 }
 
-func (r *CurrencyRepository) GetAll(ctx context.Context) (repository.Currencies, error) {
+func (r *CurrencyRepository) GetAll(_ context.Context) (repository.Currencies, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -57,12 +56,12 @@ func (r *CurrencyRepository) GetAll(ctx context.Context) (repository.Currencies,
 	return currencies, nil
 }
 
-func (r *CurrencyRepository) Update(ctx context.Context, currency entity.Currency) (*entity.Currency, error) {
+func (r *CurrencyRepository) Update(_ context.Context, currency entity.Currency) (*entity.Currency, error) {
 	r.Lock()
 	defer r.Unlock()
 
 	if _, ok := r.currencies[currency.Code]; !ok {
-		return nil, fmt.Errorf("currency does not exist: %w", repository.ErrUpdateCurrency)
+		return nil, repository.ErrNotFoundCurrency
 	}
 
 	r.currencies[currency.Code] = currency
@@ -70,12 +69,12 @@ func (r *CurrencyRepository) Update(ctx context.Context, currency entity.Currenc
 	return &currency, nil
 }
 
-func (r *CurrencyRepository) Delete(ctx context.Context, code string) error {
+func (r *CurrencyRepository) Delete(_ context.Context, code string) error {
 	r.Lock()
 	defer r.Unlock()
 
 	if _, ok := r.currencies[code]; !ok {
-		return fmt.Errorf("currency does not exist: %w", repository.ErrDeleteCurrency)
+		return repository.ErrNotFoundCurrency
 	}
 
 	delete(r.currencies, code)

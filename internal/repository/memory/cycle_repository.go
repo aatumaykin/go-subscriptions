@@ -2,7 +2,6 @@ package memory
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
@@ -20,7 +19,7 @@ func NewCycleRepository() *CycleRepository {
 	}
 }
 
-func (r *CycleRepository) Create(ctx context.Context, cycle entity.Cycle) (*entity.Cycle, error) {
+func (r *CycleRepository) Create(_ context.Context, cycle entity.Cycle) (*entity.Cycle, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -30,19 +29,19 @@ func (r *CycleRepository) Create(ctx context.Context, cycle entity.Cycle) (*enti
 	return &cycle, nil
 }
 
-func (r *CycleRepository) Get(ctx context.Context, ID uint) (*entity.Cycle, error) {
+func (r *CycleRepository) Get(_ context.Context, id uint) (*entity.Cycle, error) {
 	r.Lock()
 	defer r.Unlock()
 
-	cycle, ok := r.cycles[ID]
+	cycle, ok := r.cycles[id]
 	if !ok {
-		return nil, fmt.Errorf("cycle not found: %w", repository.ErrNotFoundCycle)
+		return nil, repository.ErrNotFoundCycle
 	}
 
 	return &cycle, nil
 }
 
-func (r *CycleRepository) GetAll(ctx context.Context) (repository.Cycles, error) {
+func (r *CycleRepository) GetAll(_ context.Context) (repository.Cycles, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -54,12 +53,12 @@ func (r *CycleRepository) GetAll(ctx context.Context) (repository.Cycles, error)
 	return cycles, nil
 }
 
-func (r *CycleRepository) Update(ctx context.Context, cycle entity.Cycle) (*entity.Cycle, error) {
+func (r *CycleRepository) Update(_ context.Context, cycle entity.Cycle) (*entity.Cycle, error) {
 	r.Lock()
 	defer r.Unlock()
 
 	if _, ok := r.cycles[cycle.ID]; !ok {
-		return nil, fmt.Errorf("cycle not found: %w", repository.ErrUpdateCycle)
+		return nil, repository.ErrUpdateCycle
 	}
 
 	r.cycles[cycle.ID] = cycle
@@ -67,15 +66,15 @@ func (r *CycleRepository) Update(ctx context.Context, cycle entity.Cycle) (*enti
 	return &cycle, nil
 }
 
-func (r *CycleRepository) Delete(ctx context.Context, ID uint) error {
+func (r *CycleRepository) Delete(_ context.Context, id uint) error {
 	r.Lock()
 	defer r.Unlock()
 
-	if _, ok := r.cycles[ID]; !ok {
-		return fmt.Errorf("cycle not found: %w", repository.ErrDeleteCycle)
+	if _, ok := r.cycles[id]; !ok {
+		return repository.ErrDeleteCycle
 	}
 
-	delete(r.cycles, ID)
+	delete(r.cycles, id)
 
 	return nil
 }

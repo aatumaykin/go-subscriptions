@@ -8,14 +8,14 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type responseDTO struct {
+type ResponseDTO struct {
 	Status  string `json:"status"`
 	Version string `json:"version"`
 }
 
 func Handle() httprouter.Handle {
 	return func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-		dto := responseDTO{
+		dto := ResponseDTO{
 			Status:  "pass",
 			Version: version.Version,
 		}

@@ -61,5 +61,18 @@ linters-settings:
   lll:
     line-length: 140
 
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - text: 'should not use underscores in package names'
+      linters:
+        - stylecheck
+    - text: "var-naming: don't use an underscore in package name"
+      linters:
+        - revive
+    - text: "Error return value of `server.Shutdown` is not checked"
+      linters:
+        - errcheck
+
 run:
   timeout: 5m

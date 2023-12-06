@@ -2,213 +2,233 @@ package memory_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/domain/entity"
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSubscriptionRepository_Create(t *testing.T) {
-	type testCase struct {
-		test         string
+	testCases := []struct {
+		name         string
 		subscription entity.Subscription
-		expectedErr  error
-	}
-
-	testCases := []testCase{
+		wantResult   *entity.Subscription
+		wantErr      error
+	}{
 		{
-			test:         "Create a new subscription",
+			name:         "Create a new subscription",
 			subscription: entity.Subscription{Name: "Test Subscription"},
-			expectedErr:  nil,
+			wantResult:   &entity.Subscription{ID: 1, Name: "Test Subscription"},
+			wantErr:      nil,
 		},
 		{
-			test:         "Create a new subscription",
-			subscription: entity.Subscription{ID: 1, Name: "Test Subscription"},
-			expectedErr:  nil,
+			name:         "Create a new subscription",
+			subscription: entity.Subscription{Name: "Test Subscription"},
+			wantResult:   &entity.Subscription{ID: 2, Name: "Test Subscription"},
+			wantErr:      nil,
 		},
 	}
 
 	repo := memory.NewSubscriptionRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			createdSubscription, err := repo.Create(context.Background(), tc.subscription)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := repo.Create(ctx, tc.subscription)
 
-			if createdSubscription != nil {
-				found, err := repo.Get(context.Background(), createdSubscription.ID)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if createdSubscription.Name != found.Name {
-					t.Errorf("Expected %v, got %v", createdSubscription.Name, found.Name)
-				}
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantResult, result)
 			}
 		})
 	}
 }
 
 func TestSubscriptionRepository_Get(t *testing.T) {
-	type testCase struct {
-		test         string
+	testCases := []struct {
+		name         string
 		subscription entity.Subscription
-		expectedID   uint
-		expectedErr  error
-	}
-
-	testCases := []testCase{
+		id           uint
+		wantErr      error
+	}{
 		{
-			test:         "Get an existing subscription",
+			name:         "Get an existing subscription",
 			subscription: entity.Subscription{Name: "Test Subscription"},
-			expectedID:   1,
-			expectedErr:  nil,
+			id:           1,
+			wantErr:      nil,
 		},
 		{
-			test:         "Get a non-existing subscription",
+			name:         "Get an existing subscription",
 			subscription: entity.Subscription{Name: "Test Subscription"},
-			expectedID:   3,
-			expectedErr:  repository.ErrNotFoundSubscription,
+			id:           2,
+			wantErr:      nil,
+		},
+		{
+			name:         "Get a non-existing subscription",
+			subscription: entity.Subscription{Name: "Test Subscription"},
+			id:           10,
+			wantErr:      repository.ErrNotFoundSubscription,
 		},
 	}
 
 	repo := memory.NewSubscriptionRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			_, err := repo.Create(context.Background(), tc.subscription)
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			createdSubs, err := repo.Create(ctx, tc.subscription)
+			assert.NoError(t, err)
 
-			_, err = repo.Get(context.Background(), tc.expectedID)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
+			foundSubs, err := repo.Get(ctx, tc.id)
+
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, createdSubs, foundSubs)
 			}
 		})
 	}
 }
 
 func TestSubscriptionRepository_GetAll(t *testing.T) {
-	type testCase struct {
-		test          string
-		subscriptions []entity.Subscription
+	testCases := []struct {
+		name          string
+		subscriptions repository.Subscriptions
+		wantResult    repository.Subscriptions
 		expectedLen   int
-	}
-
-	testCases := []testCase{
+	}{
 		{
-			test:        "Empty repository",
+			name:        "Empty repository",
 			expectedLen: 0,
 		},
 		{
-			test:          "Get all subscriptions",
+			name:          "Get all subscriptions",
 			subscriptions: []entity.Subscription{{Name: "Subscription 1"}, {Name: "Subscription 2"}},
+			wantResult:    []entity.Subscription{{ID: 1, Name: "Subscription 1"}, {ID: 2, Name: "Subscription 2"}},
 			expectedLen:   2,
 		},
 	}
 
 	repo := memory.NewSubscriptionRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			for _, subscription := range tc.subscriptions {
-				_, err := repo.Create(context.Background(), subscription)
-				if err != nil {
-					t.Fatal(err)
-				}
+				_, err := repo.Create(ctx, subscription)
+				assert.NoError(t, err)
 			}
 
-			subscriptions, _ := repo.GetAll(context.Background())
-			if len(subscriptions) != tc.expectedLen {
-				t.Errorf("Expected %v, got %v", tc.expectedLen, len(subscriptions))
-			}
+			subscriptions, err := repo.GetAll(ctx)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.wantResult, subscriptions)
+			assert.Equal(t, tc.expectedLen, len(subscriptions))
 		})
 	}
 }
 
 func TestSubscriptionRepository_Update(t *testing.T) {
-	type testCase struct {
-		test                string
+	testCases := []struct {
+		name                string
 		initialSubscription entity.Subscription
 		updatedSubscription entity.Subscription
-		expectedErr         error
-	}
-
-	testCases := []testCase{
+		wantResult          *entity.Subscription
+		wantErr             error
+	}{
 		{
-			test:                "Update an existing subscription",
+			name:                "Update an existing subscription",
 			initialSubscription: entity.Subscription{Name: "Test Subscription"},
 			updatedSubscription: entity.Subscription{ID: 1, Name: "Updated Test Subscription"},
-			expectedErr:         nil,
+			wantResult:          &entity.Subscription{ID: 1, Name: "Updated Test Subscription"},
+			wantErr:             nil,
 		},
 		{
-			test:                "Update a non-existing subscription",
+			name:                "Update an existing subscription",
 			initialSubscription: entity.Subscription{Name: "Test Subscription"},
-			updatedSubscription: entity.Subscription{ID: 3, Name: "Updated Test Subscription"},
-			expectedErr:         repository.ErrUpdateSubscription,
+			updatedSubscription: entity.Subscription{ID: 2, Name: "Updated Test Subscription"},
+			wantResult:          &entity.Subscription{ID: 2, Name: "Updated Test Subscription"},
+			wantErr:             nil,
+		},
+		{
+			name:                "Update a non-existing subscription",
+			initialSubscription: entity.Subscription{Name: "Test Subscription"},
+			updatedSubscription: entity.Subscription{ID: 10, Name: "Updated Test Subscription"},
+			wantResult:          nil,
+			wantErr:             repository.ErrUpdateSubscription,
 		},
 	}
 
 	repo := memory.NewSubscriptionRepository()
+	ctx := context.Background()
 
 	for _, tc := range testCases {
-		t.Run(tc.test, func(t *testing.T) {
-			_, err := repo.Create(context.Background(), tc.initialSubscription)
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := repo.Create(ctx, tc.initialSubscription)
+			assert.NoError(t, err)
 
-			updatedSubscription, err := repo.Update(context.Background(), tc.updatedSubscription)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("Expected error: %v, got: %v", tc.expectedErr, err)
-			}
+			result, err := repo.Update(ctx, tc.updatedSubscription)
 
-			if updatedSubscription != nil {
-				found, err := repo.Get(context.Background(), updatedSubscription.ID)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if updatedSubscription.Name != found.Name {
-					t.Errorf("Expected %v, got %v", updatedSubscription.Name, found.Name)
-				}
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantResult, result)
 			}
 		})
 	}
 }
 
 func TestSubscriptionRepository_Delete(t *testing.T) {
-	repo := memory.NewSubscriptionRepository()
+	testCases := []struct {
+		name         string
+		subscription entity.Subscription
+		id           uint
+		wantErr      error
+	}{
+		{
+			name:         "Delete an existing subscription",
+			subscription: entity.Subscription{Name: "Test Subscription"},
+			id:           1,
+			wantErr:      nil,
+		},
+		{
+			name:         "Delete an existing subscription",
+			subscription: entity.Subscription{Name: "Test Subscription"},
+			id:           1,
+			wantErr:      nil,
+		},
+		{
+			name:         "Delete a non-existing subscription",
+			subscription: entity.Subscription{Name: "Test Subscription"},
+			id:           10,
+			wantErr:      repository.ErrDeleteSubscription,
+		},
+	}
 
+	repo := memory.NewSubscriptionRepository()
 	ctx := context.Background()
 
-	t.Run("Non-existing subscription", func(t *testing.T) {
-		err := repo.Delete(ctx, 3)
-		if err == nil {
-			t.Error("Expected error, got nil")
-		}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := repo.Create(ctx, tc.subscription)
+			assert.NoError(t, err)
 
-		if !errors.Is(err, repository.ErrDeleteSubscription) {
-			t.Errorf("Expected error: %v, got: %v", repository.ErrDeleteSubscription, err)
-		}
-	})
+			err = repo.Delete(ctx, tc.id)
 
-	t.Run("Existing subscription", func(t *testing.T) {
-		_, err := repo.Create(context.Background(), entity.Subscription{Name: "Test Subscription"})
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		err = repo.Delete(ctx, 1)
-		if err != nil {
-			t.Errorf("Expected no error, got: %v", err)
-		}
-
-		if _, err := repo.Get(context.Background(), 1); err == nil {
-			t.Errorf("Expected subscription to be deleted")
-		}
-	})
+			if tc.wantErr != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tc.wantErr, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

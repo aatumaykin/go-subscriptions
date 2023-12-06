@@ -5,11 +5,11 @@ import (
 )
 
 type ServiceFactory struct {
-	repositoryFactory *RepositoryFactory
-	*service.CategoryService
-	*service.CurrencyService
-	*service.CycleService
-	*service.SubscriptionService
+	repositoryFactory   *RepositoryFactory
+	CategoryService     *service.CategoryService
+	CurrencyService     *service.CurrencyService
+	CycleService        *service.CycleService
+	SubscriptionService *service.SubscriptionService
 }
 
 type ServiceConfiguration func(sf *ServiceFactory) error

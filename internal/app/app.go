@@ -2,9 +2,14 @@ package app
 
 import (
 	"context"
+	"errors"
 
 	"git.home/alex/go-subscriptions/internal/config"
 	"git.home/alex/go-subscriptions/internal/factory"
+)
+
+var (
+	errUndefinedStorage = errors.New("undefined storage")
 )
 
 type App struct {
@@ -85,10 +90,9 @@ func withServiceFactory(factory *factory.ServiceFactory) Configuration {
 }
 
 func factoryRepository(storage string) (*factory.RepositoryFactory, error) {
-	switch storage {
-	case "memory":
+	if storage == "memory" {
 		return factory.NewRepositoryFactory(factory.WithMemoryRepository())
 	}
 
-	return factory.NewRepositoryFactory(factory.WithMemoryRepository())
+	return nil, errUndefinedStorage
 }

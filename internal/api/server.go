@@ -25,6 +25,8 @@ type HTTPServer struct {
 
 type Configuration func(s *HTTPServer) error
 
+const defaultTimeout = 5 * time.Second
+
 func NewHTTPServer(cfgs ...Configuration) (*HTTPServer, error) {
 	s := &HTTPServer{}
 
@@ -94,7 +96,7 @@ func (s *HTTPServer) ListenAndServe() {
 	<-stop
 
 	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	// Doesn't block if no connections, but will otherwise wait
@@ -111,7 +113,7 @@ func WithHealthHandler() Configuration {
 	}
 }
 
-func WithCategoryCollectionGetterHandler(categoryService service.CategoryService) Configuration {
+func WithCategoryCollectionGetterHandler(categoryService *service.CategoryService) Configuration {
 	return func(s *HTTPServer) error {
 		s.router.GET("/api/categories", category_handler.CollectionGetterHandle(s.ctx, categoryService))
 		return nil

@@ -7,6 +7,10 @@ import (
 	"git.home/alex/go-subscriptions/internal/repository/memory"
 )
 
+var (
+	ErrNotImplemented = errors.New("not implemented")
+)
+
 type RepositoryFactory struct {
 	repository.CategoryRepository
 	repository.CurrencyRepository
@@ -42,12 +46,12 @@ func WithMemoryRepository() RepositoryConfiguration {
 
 func WithRedisRepository() RepositoryConfiguration {
 	return func(rf *RepositoryFactory) error {
-		return errors.New("not implemented")
+		return ErrNotImplemented
 	}
 }
 
 func WithSqliteRepository() RepositoryConfiguration {
 	return func(rf *RepositoryFactory) error {
-		return errors.New("not implemented")
+		return ErrNotImplemented
 	}
 }

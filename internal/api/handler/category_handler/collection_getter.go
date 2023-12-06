@@ -10,7 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func CollectionGetterHandle(ctx context.Context, categoryService service.CategoryService) httprouter.Handle {
+func CollectionGetterHandle(ctx context.Context, categoryService *service.CategoryService) httprouter.Handle {
 	return func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 		categories, err := categoryService.GetAllCategories(ctx)
 		if err != nil {
