@@ -21,11 +21,11 @@ func NewSubscriptionService(repo repository.SubscriptionRepository) *Subscriptio
 }
 
 func (s *SubscriptionService) CreateSubscription(ctx context.Context, subscription entity.Subscription) (*entity.Subscription, error) {
-	if subscription.ID == 0 || subscription.Price <= 0 || subscription.Name == "" {
+	if subscription.Price <= 0 || subscription.Name == "" {
 		return nil, ErrInvalidSubscription
 	}
 
-	if subscription.Category.ID == 0 || subscription.Currency.Code == "" || subscription.Cycle.ID == 0 {
+	if subscription.Currency.Code == "" || subscription.Cycle.ID == 0 {
 		return nil, ErrInvalidSubscription
 	}
 
@@ -45,7 +45,7 @@ func (s *SubscriptionService) UpdateSubscription(ctx context.Context, subscripti
 		return nil, ErrInvalidSubscription
 	}
 
-	if subscription.Category.ID == 0 || subscription.Currency.Code == "" || subscription.Cycle.ID == 0 {
+	if subscription.Currency.Code == "" || subscription.Cycle.ID == 0 {
 		return nil, ErrInvalidSubscription
 	}
 
