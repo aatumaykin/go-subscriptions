@@ -106,25 +106,25 @@ func TestCategoryService_CreateCategory(t *testing.T) {
 func TestCategoryService_GetCategory(t *testing.T) {
 	testCases := []struct {
 		name       string
-		categoryID uint
+		id         uint
 		wantErr    error
 		wantResult *entity.Category
 	}{
 		{
 			name:       "ID is zero",
-			categoryID: 0,
+			id:         0,
 			wantErr:    repository.ErrNotFoundCategory,
 			wantResult: nil,
 		},
 		{
 			name:       "Test valid category ID",
-			categoryID: 1,
+			id:         1,
 			wantErr:    nil,
 			wantResult: &entity.Category{ID: 1, Name: "Test Category"},
 		},
 		{
 			name:       "Test error",
-			categoryID: 1,
+			id:         1,
 			wantErr:    errors.New("some error"),
 			wantResult: nil,
 		},
@@ -135,10 +135,10 @@ func TestCategoryService_GetCategory(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("Get", ctx, tc.categoryID).Return(tc.wantResult, tc.wantErr)
+			mockRepo.On("Get", ctx, tc.id).Return(tc.wantResult, tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
-			result, err := categoryService.GetCategory(ctx, tc.categoryID)
+			result, err := categoryService.GetCategory(ctx, tc.id)
 
 			if tc.wantErr != nil {
 				assert.Error(t, err)
@@ -254,24 +254,24 @@ func TestCategoryService_UpdateCategory(t *testing.T) {
 
 func TestCategoryService_DeleteCategory(t *testing.T) {
 	testCases := []struct {
-		name       string
-		categoryID uint
-		wantErr    error
+		name    string
+		id      uint
+		wantErr error
 	}{
 		{
-			name:       "ID is zero",
-			categoryID: 0,
-			wantErr:    repository.ErrNotFoundCategory,
+			name:    "ID is zero",
+			id:      0,
+			wantErr: repository.ErrNotFoundCategory,
 		},
 		{
-			name:       "Test valid category",
-			categoryID: 1,
-			wantErr:    nil,
+			name:    "Test valid category",
+			id:      1,
+			wantErr: nil,
 		},
 		{
-			name:       "Test error",
-			categoryID: 1,
-			wantErr:    errors.New("some error"),
+			name:    "Test error",
+			id:      1,
+			wantErr: errors.New("some error"),
 		},
 	}
 
@@ -280,10 +280,10 @@ func TestCategoryService_DeleteCategory(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			mockRepo := new(MockCategoryRepository)
-			mockRepo.On("Delete", ctx, tc.categoryID).Return(tc.wantErr)
+			mockRepo.On("Delete", ctx, tc.id).Return(tc.wantErr)
 
 			categoryService := service.NewCategoryService(mockRepo)
-			err := categoryService.DeleteCategory(ctx, tc.categoryID)
+			err := categoryService.DeleteCategory(ctx, tc.id)
 
 			if tc.wantErr != nil {
 				assert.Error(t, err)
