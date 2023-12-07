@@ -7,6 +7,7 @@ import (
 	"git.home/alex/go-subscriptions/internal/api/handler/cycle_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/empty_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/health_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/subscription_handler"
 	"git.home/alex/go-subscriptions/internal/domain/service"
 )
 
@@ -53,9 +54,9 @@ func WithCycleHandlers(cs *service.CycleService) Configuration {
 	}
 }
 
-func WithSubscribeHandlers(_ *service.SubscriptionService) Configuration {
+func WithSubscribeHandlers(opts *subscription_handler.HandlerOpts) Configuration {
 	return func(s *HTTPServer) error {
-		s.router.POST("/api/subscription", empty_handler.Handle())
+		s.router.POST("/api/subscription", handler.Handle(subscription_handler.CreateSubscription(s.ctx, opts)))
 		s.router.GET("/api/subscription/:id", empty_handler.Handle())
 		s.router.GET("/api/subscriptions", empty_handler.Handle())
 		s.router.PUT("/api/subscription/:id", empty_handler.Handle())
