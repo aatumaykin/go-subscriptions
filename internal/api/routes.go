@@ -4,6 +4,7 @@ import (
 	"git.home/alex/go-subscriptions/internal/api/handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/currency_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/cycle_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/empty_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/health_handler"
 	"git.home/alex/go-subscriptions/internal/domain/service"
@@ -40,13 +41,13 @@ func WithCurrencyHandlers(cs *service.CurrencyService) Configuration {
 	}
 }
 
-func WithCycleHandlers(_ *service.CycleService) Configuration {
+func WithCycleHandlers(cs *service.CycleService) Configuration {
 	return func(s *HTTPServer) error {
-		s.router.POST("/api/cycle", empty_handler.Handle())
-		s.router.GET("/api/cycle/:id", empty_handler.Handle())
-		s.router.GET("/api/cycles", empty_handler.Handle())
-		s.router.PUT("/api/cycle/:id", empty_handler.Handle())
-		s.router.DELETE("/api/cycle/:id", empty_handler.Handle())
+		s.router.POST("/api/cycle", handler.Handle(cycle_handler.CreateCycle(s.ctx, cs)))
+		s.router.GET("/api/cycle/:id", handler.Handle(cycle_handler.GetCycle(s.ctx, cs)))
+		s.router.GET("/api/cycles", handler.Handle(cycle_handler.GetCycles(s.ctx, cs)))
+		s.router.PUT("/api/cycle/:id", handler.Handle(cycle_handler.UpdateCycle(s.ctx, cs)))
+		s.router.DELETE("/api/cycle/:id", handler.Handle(cycle_handler.DeleteCycle(s.ctx, cs)))
 
 		return nil
 	}

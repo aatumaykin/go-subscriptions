@@ -58,7 +58,7 @@ func (r *CycleRepository) Update(_ context.Context, cycle entity.Cycle) (*entity
 	defer r.Unlock()
 
 	if _, ok := r.cycles[cycle.ID]; !ok {
-		return nil, repository.ErrUpdateCycle
+		return nil, repository.ErrNotFoundCycle
 	}
 
 	r.cycles[cycle.ID] = cycle
@@ -71,7 +71,7 @@ func (r *CycleRepository) Delete(_ context.Context, id uint) error {
 	defer r.Unlock()
 
 	if _, ok := r.cycles[id]; !ok {
-		return repository.ErrDeleteCycle
+		return repository.ErrNotFoundCycle
 	}
 
 	delete(r.cycles, id)

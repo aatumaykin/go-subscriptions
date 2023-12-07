@@ -163,7 +163,7 @@ func TestCycleRepository_Update(t *testing.T) {
 			name:         "Update a non-existing cycle",
 			initialCycle: entity.Cycle{Name: "Cycle 2"},
 			updatedCycle: entity.Cycle{ID: 10, Name: "Updated Cycle"},
-			wantErr:      repository.ErrUpdateCycle,
+			wantErr:      repository.ErrNotFoundCycle,
 		},
 	}
 
@@ -211,7 +211,7 @@ func TestCycleRepository_Delete(t *testing.T) {
 			name:    "Delete a non-existing cycle",
 			cycle:   entity.Cycle{Name: "Test Cycle 3"},
 			id:      10,
-			wantErr: repository.ErrDeleteCycle,
+			wantErr: repository.ErrNotFoundCycle,
 		},
 	}
 
