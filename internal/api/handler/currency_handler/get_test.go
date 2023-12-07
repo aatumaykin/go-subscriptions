@@ -1,4 +1,4 @@
-package category_handler_test
+package currency_handler_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/api/api_response"
-	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/currency_handler"
 	"git.home/alex/go-subscriptions/internal/domain/entity"
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/domain/service"
@@ -19,48 +19,45 @@ import (
 
 func TestGetHandle(t *testing.T) {
 	type responseDTO struct {
-		ID   uint   `json:"id"`
-		Name string `json:"name"`
+		Code   string `json:"code"`
+		Name   string `json:"name"`
+		Symbol string `json:"symbol"`
 	}
 
 	testCases := []struct {
 		name           string
-		id             string
-		category       entity.Category
+		code           string
+		currency       entity.Currency
 		expectedStatus int
 		expectedBody   api_response.ResponseDTO
 	}{
 		{
 			name:           "success",
-			id:             "1",
-			category:       entity.Category{ID: 1, Name: "Test Category"},
+			code:           "USD",
+			currency:       entity.Currency{Code: "USD", Name: "US Dollar", Symbol: "$"},
 			expectedStatus: http.StatusOK,
-			expectedBody: api_response.Success(responseDTO{
-				ID:   1,
-				Name: "Test Category",
-			}),
+			expectedBody:   api_response.Success(responseDTO{Code: "USD", Name: "US Dollar", Symbol: "$"}),
 		},
 		{
-			name:           "error",
-			id:             "10",
-			category:       entity.Category{ID: 2, Name: "Test Category"},
+			name:           "Test not found",
+			code:           "RUB",
+			currency:       entity.Currency{Code: "EUR", Name: "Euro", Symbol: "€"},
 			expectedStatus: http.StatusOK,
-			expectedBody:   api_response.Error(repository.ErrNotFoundCategory),
+			expectedBody:   api_response.Error(repository.ErrNotFoundCurrency),
 		},
 	}
 
-	cs := service.NewCategoryService(memory.NewCategoryRepository())
+	cs := service.NewCurrencyService(memory.NewCurrencyRepository())
 	ctx := context.Background()
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := cs.CreateCategory(ctx, tc.category)
-			assert.NoError(t, err)
+			_, _ = cs.CreateCurrency(ctx, tc.currency)
 
 			w := httptest.NewRecorder()
-			ps := httprouter.Params{{Key: "id", Value: tc.id}}
+			ps := httprouter.Params{{Key: "code", Value: tc.code}}
 
-			category_handler.GetHandle(ctx, cs)(w, nil, ps)
+			currency_handler.GetHandle(ctx, cs)(w, nil, ps)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			assert.Equal(t, "application/json", w.Header().Get("Content-Type"))

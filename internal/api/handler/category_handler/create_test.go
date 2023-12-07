@@ -13,11 +13,10 @@ import (
 	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
 	"git.home/alex/go-subscriptions/internal/domain/service"
 	"git.home/alex/go-subscriptions/internal/repository/memory"
-	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateCategoryHandle(t *testing.T) {
+func TestCreateHandle(t *testing.T) {
 	type requestDTO struct {
 		Name string `json:"name"`
 	}
@@ -34,19 +33,19 @@ func TestCreateCategoryHandle(t *testing.T) {
 		expectedBody   api_response.ResponseDTO
 	}{
 		{
-			name:           "success",
+			name:           "Test Create Category",
 			requestBody:    requestDTO{Name: "Test Category"},
 			expectedStatus: http.StatusOK,
 			expectedBody:   api_response.Success(responseDTO{ID: 1, Name: "Test Category"}),
 		},
 		{
-			name:           "success",
+			name:           "Test Create Category",
 			requestBody:    requestDTO{Name: "Test Category 2"},
 			expectedStatus: http.StatusOK,
 			expectedBody:   api_response.Success(responseDTO{ID: 2, Name: "Test Category 2"}),
 		},
 		{
-			name:           "error",
+			name:           "Test validation error",
 			requestBody:    requestDTO{Name: ""},
 			expectedStatus: http.StatusOK,
 			expectedBody:   api_response.Error(service.ErrInvalidCategory),
@@ -64,9 +63,8 @@ func TestCreateCategoryHandle(t *testing.T) {
 			r := &http.Request{
 				Body: io.NopCloser(bytes.NewBuffer(requestBodyBytes)),
 			}
-			ps := httprouter.Params{}
 
-			category_handler.CreateHandle(ctx, cs)(w, r, ps)
+			category_handler.CreateHandle(ctx, cs)(w, r, nil)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			assert.Equal(t, "application/json", w.Header().Get("Content-Type"))

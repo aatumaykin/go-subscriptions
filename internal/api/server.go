@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/currency_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/empty_handler"
 	"git.home/alex/go-subscriptions/internal/api/handler/health_handler"
 	"git.home/alex/go-subscriptions/internal/domain/service"
 	"github.com/julienschmidt/httprouter"
@@ -113,37 +115,50 @@ func WithHealthHandler() Configuration {
 	}
 }
 
-func WithCategoryCollectionGetHandler(categoryService *service.CategoryService) Configuration {
-	return func(s *HTTPServer) error {
-		s.router.GET("/api/categories", category_handler.CollectionGetHandle(s.ctx, categoryService))
-		return nil
-	}
-}
-
-func WithCategoryCreateHandler(categoryService *service.CategoryService) Configuration {
+func WithCategoryHandlers(categoryService *service.CategoryService) Configuration {
 	return func(s *HTTPServer) error {
 		s.router.POST("/api/category", category_handler.CreateHandle(s.ctx, categoryService))
-		return nil
-	}
-}
-
-func WithCategoryGetHandler(categoryService *service.CategoryService) Configuration {
-	return func(s *HTTPServer) error {
 		s.router.GET("/api/category/:id", category_handler.GetHandle(s.ctx, categoryService))
-		return nil
-	}
-}
-
-func WithCategoryUpdateHandler(categoryService *service.CategoryService) Configuration {
-	return func(s *HTTPServer) error {
+		s.router.GET("/api/categories", category_handler.CollectionGetHandle(s.ctx, categoryService))
 		s.router.PUT("/api/category/:id", category_handler.UpdateHandle(s.ctx, categoryService))
+		s.router.DELETE("/api/category/:id", category_handler.DeleteHandle(s.ctx, categoryService))
+
 		return nil
 	}
 }
 
-func WithCategoryDeleteHandler(categoryService *service.CategoryService) Configuration {
+func WithCurrencyHandlers(currencyService *service.CurrencyService) Configuration {
 	return func(s *HTTPServer) error {
-		s.router.DELETE("/api/category/:id", category_handler.DeleteHandle(s.ctx, categoryService))
+		s.router.POST("/api/currency", currency_handler.CreateHandle(s.ctx, currencyService))
+		s.router.GET("/api/currency/:id", currency_handler.GetHandle(s.ctx, currencyService))
+		s.router.GET("/api/currencies", currency_handler.CollectionGetHandle(s.ctx, currencyService))
+		s.router.PUT("/api/currency/:id", empty_handler.Handle())
+		s.router.DELETE("/api/currency/:id", empty_handler.Handle())
+
+		return nil
+	}
+}
+
+func WithCycleHandlers(cycleService *service.CycleService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.POST("/api/cycle", empty_handler.Handle())
+		s.router.GET("/api/cycle/:id", empty_handler.Handle())
+		s.router.GET("/api/cycles", empty_handler.Handle())
+		s.router.PUT("/api/cycle/:id", empty_handler.Handle())
+		s.router.DELETE("/api/cycle/:id", empty_handler.Handle())
+
+		return nil
+	}
+}
+
+func WithSubscribeHandlers(subscriptionService *service.SubscriptionService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.POST("/api/subscription", empty_handler.Handle())
+		s.router.GET("/api/subscription/:id", empty_handler.Handle())
+		s.router.GET("/api/subscriptions", empty_handler.Handle())
+		s.router.PUT("/api/subscription/:id", empty_handler.Handle())
+		s.router.DELETE("/api/subscription/:id", empty_handler.Handle())
+
 		return nil
 	}
 }

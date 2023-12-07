@@ -1,4 +1,4 @@
-package category_handler_test
+package currency_handler_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"git.home/alex/go-subscriptions/internal/api/api_response"
-	"git.home/alex/go-subscriptions/internal/api/handler/category_handler"
+	"git.home/alex/go-subscriptions/internal/api/handler/currency_handler"
 	"git.home/alex/go-subscriptions/internal/domain/repository"
 	"git.home/alex/go-subscriptions/internal/domain/service"
 	"git.home/alex/go-subscriptions/tests"
@@ -18,33 +18,41 @@ import (
 
 func TestCollectionGetHandle(t *testing.T) {
 	type responseDTO struct {
-		ID   uint   `json:"id"`
-		Name string `json:"name"`
+		Code   string `json:"code"`
+		Name   string `json:"name"`
+		Symbol string `json:"symbol"`
 	}
 
 	testCases := []struct {
 		name           string
-		categories     repository.Categories
+		currencies     repository.Currencies
 		mockError      error
 		expectedStatus int
 		expectedBody   api_response.ResponseDTO
 	}{
 		{
+			name:           "Empty currencies",
+			currencies:     repository.Currencies{},
+			mockError:      nil,
+			expectedStatus: http.StatusOK,
+			expectedBody:   api_response.Success([]responseDTO{}),
+		},
+		{
 			name: "Success",
-			categories: repository.Categories{
-				{ID: 1, Name: "Category 1"},
-				{ID: 2, Name: "Category 2"},
+			currencies: repository.Currencies{
+				{Code: "USD", Symbol: "$", Name: "US Dollar"},
+				{Code: "RUB", Symbol: "₽", Name: "Russian Ruble"},
 			},
 			mockError:      nil,
 			expectedStatus: http.StatusOK,
 			expectedBody: api_response.Success([]responseDTO{
-				{ID: 1, Name: "Category 1"},
-				{ID: 2, Name: "Category 2"},
+				{Code: "USD", Symbol: "$", Name: "US Dollar"},
+				{Code: "RUB", Symbol: "₽", Name: "Russian Ruble"},
 			}),
 		},
 		{
 			name:           "Error",
-			categories:     nil,
+			currencies:     nil,
 			mockError:      tests.ErrTest,
 			expectedStatus: http.StatusOK,
 			expectedBody:   api_response.Error(tests.ErrTest),
@@ -55,13 +63,13 @@ func TestCollectionGetHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRepo := new(mock_repository.MockCategoryRepository)
-			mockRepo.On("GetAll", context.Background()).Return(tc.categories, tc.mockError)
+			mockRepo := new(mock_repository.MockCurrencyRepository)
+			mockRepo.On("GetAll", context.Background()).Return(tc.currencies, tc.mockError)
 
-			cs := service.NewCategoryService(mockRepo)
+			cs := service.NewCurrencyService(mockRepo)
 			w := httptest.NewRecorder()
 
-			category_handler.CollectionGetHandle(ctx, cs)(w, nil, nil)
+			currency_handler.CollectionGetHandle(ctx, cs)(w, nil, nil)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			assert.Equal(t, "application/json", w.Header().Get("Content-Type"), "handler returned wrong content type")

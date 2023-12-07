@@ -1,9 +1,8 @@
-package category_handler
+package currency_handler
 
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"git.home/alex/go-subscriptions/internal/api/api_response"
 	"git.home/alex/go-subscriptions/internal/api/handler/error_handler"
@@ -12,28 +11,26 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func GetHandle(ctx context.Context, categoryService *service.CategoryService) httprouter.Handle {
+func GetHandle(ctx context.Context, currencyService *service.CurrencyService) httprouter.Handle {
 	return middleware.SetJSONContentType(func(w http.ResponseWriter, _ *http.Request, ps httprouter.Params) {
-		id, err := strconv.Atoi(ps.ByName("id"))
-		if err != nil {
-			error_handler.HandleError(w, err)
-			return
-		}
+		code := ps.ByName("code")
 
-		category, err := categoryService.GetCategory(ctx, uint(id))
+		currency, err := currencyService.GetCurrency(ctx, code)
 		if err != nil {
 			error_handler.HandleError(w, err)
 			return
 		}
 
 		type responseDTO struct {
-			ID   uint   `json:"id"`
-			Name string `json:"name"`
+			Code   string `json:"code"`
+			Name   string `json:"name"`
+			Symbol string `json:"symbol"`
 		}
 
 		response, err := api_response.Success(responseDTO{
-			ID:   category.ID,
-			Name: category.Name,
+			Code:   currency.Code,
+			Name:   currency.Name,
+			Symbol: currency.Symbol,
 		}).ToJSON()
 		if err != nil {
 			error_handler.HandleError(w, err)

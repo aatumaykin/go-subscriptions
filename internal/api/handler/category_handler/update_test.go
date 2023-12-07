@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUpdateCategoryHandle(t *testing.T) {
+func TestUpdateHandle(t *testing.T) {
 	type requestDTO struct {
 		Name string `json:"name"`
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"git.home/alex/go-subscriptions/internal/api/middleware"
 	"git.home/alex/go-subscriptions/internal/version"
 	"github.com/julienschmidt/httprouter"
 )
@@ -14,7 +15,7 @@ type ResponseDTO struct {
 }
 
 func Handle() httprouter.Handle {
-	return func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+	return middleware.SetJSONContentType(func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 		dto := ResponseDTO{
 			Status:  "pass",
 			Version: version.Version,
@@ -26,7 +27,6 @@ func Handle() httprouter.Handle {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write(response)
-	}
+	})
 }

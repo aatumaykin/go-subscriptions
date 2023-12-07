@@ -41,19 +41,18 @@ func TestDeleteHandle(t *testing.T) {
 		},
 	}
 
-	categoryService := service.NewCategoryService(memory.NewCategoryRepository())
+	cs := service.NewCategoryService(memory.NewCategoryRepository())
 	ctx := context.Background()
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := categoryService.CreateCategory(ctx, tc.category)
+			_, err := cs.CreateCategory(ctx, tc.category)
 			assert.NoError(t, err)
 
 			w := httptest.NewRecorder()
-			r := &http.Request{}
 			ps := httprouter.Params{{Key: "id", Value: tc.id}}
 
-			category_handler.DeleteHandle(ctx, categoryService)(w, r, ps)
+			category_handler.DeleteHandle(ctx, cs)(w, nil, ps)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
