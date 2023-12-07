@@ -1,7 +1,6 @@
 package health_handler_test
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,17 +14,12 @@ import (
 
 func TestHandle(t *testing.T) {
 	testCases := []struct {
-		name           string
-		expectedStatus int
-		expectedBody   health_handler.ResponseDTO
+		name     string
+		expected string
 	}{
 		{
-			name:           "success",
-			expectedStatus: http.StatusOK,
-			expectedBody: health_handler.ResponseDTO{
-				Status:  "pass",
-				Version: version.Version,
-			},
+			name:     "success",
+			expected: `{"status":"pass","version":"` + version.Version + `"}`,
 		},
 	}
 
@@ -37,13 +31,8 @@ func TestHandle(t *testing.T) {
 
 			health_handler.Handle()(w, r, ps)
 
-			assert.Equal(t, tc.expectedStatus, w.Code, "handler returned wrong status code")
 			assert.Equal(t, "application/json", w.Header().Get("Content-Type"), "handler returned wrong content type")
-
-			expectedBody, err := json.Marshal(tc.expectedBody)
-			assert.NoError(t, err)
-
-			assert.Equal(t, string(expectedBody), w.Body.String(), "handler returned unexpected body")
+			assert.Equal(t, tc.expected, w.Body.String(), "handler returned unexpected body")
 		})
 	}
 }

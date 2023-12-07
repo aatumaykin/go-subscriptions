@@ -1,12 +1,11 @@
 package empty_handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
 	"git.home/alex/go-subscriptions/internal/api/api_response"
-	"git.home/alex/go-subscriptions/internal/api/handler/error_handler"
-	"git.home/alex/go-subscriptions/internal/api/middleware"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -15,13 +14,11 @@ var (
 )
 
 func Handle() httprouter.Handle {
-	return middleware.SetJSONContentType(func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+	return func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+		dto := api_response.Error(ErrNotImplemented)
+		response, _ := json.Marshal(dto)
 
-		response, err := api_response.Error(ErrNotImplemented).ToJSON()
-		if err != nil {
-			error_handler.HandleError(w, err)
-			return
-		}
+		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write(response)
-	})
+	}
 }
