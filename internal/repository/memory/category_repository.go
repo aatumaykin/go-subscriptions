@@ -58,7 +58,7 @@ func (r *CategoryRepository) Update(_ context.Context, category entity.Category)
 	defer r.Unlock()
 
 	if _, ok := r.categories[category.ID]; !ok {
-		return nil, repository.ErrUpdateCategory
+		return nil, repository.ErrNotFoundCategory
 	}
 
 	r.categories[category.ID] = category
@@ -71,7 +71,7 @@ func (r *CategoryRepository) Delete(_ context.Context, id uint) error {
 	defer r.Unlock()
 
 	if _, ok := r.categories[id]; !ok {
-		return repository.ErrDeleteCategory
+		return repository.ErrNotFoundCategory
 	}
 
 	delete(r.categories, id)

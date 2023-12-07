@@ -18,6 +18,11 @@ import (
 )
 
 func TestCollectionGetterHandle(t *testing.T) {
+	type responseDTO struct {
+		ID   uint   `json:"id"`
+		Name string `json:"name"`
+	}
+
 	testCases := []struct {
 		name           string
 		categories     repository.Categories
@@ -35,7 +40,7 @@ func TestCollectionGetterHandle(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			expectedBody: api_response.ResponseDTO{
 				Status: "success",
-				Data: []category_handler.CategoryDTO{
+				Data: []responseDTO{
 					{ID: 1, Name: "Category 1"},
 					{ID: 2, Name: "Category 2"},
 				},
@@ -62,21 +67,19 @@ func TestCollectionGetterHandle(t *testing.T) {
 
 			cs := service.NewCategoryService(mockRepo)
 
-			router := httprouter.New()
-			router.GET("/categories", category_handler.CollectionGetterHandle(ctx, cs))
+			w := httptest.NewRecorder()
+			r := &http.Request{}
+			ps := httprouter.Params{}
 
-			req, _ := http.NewRequestWithContext(ctx, "GET", "/categories", nil)
-			rr := httptest.NewRecorder()
+			category_handler.CollectionGetHandle(ctx, cs)(w, r, ps)
 
-			router.ServeHTTP(rr, req)
-
-			assert.Equal(t, tc.expectedStatus, rr.Code)
-			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"), "handler returned wrong content type")
+			assert.Equal(t, tc.expectedStatus, w.Code)
+			assert.Equal(t, "application/json", w.Header().Get("Content-Type"), "handler returned wrong content type")
 
 			expectedBody, err := json.Marshal(tc.expectedBody)
 			assert.NoError(t, err)
 
-			assert.Equal(t, string(expectedBody), rr.Body.String())
+			assert.Equal(t, string(expectedBody), w.Body.String())
 		})
 	}
 }

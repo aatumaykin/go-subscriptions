@@ -8,10 +8,13 @@ type ResponseDTO struct {
 	Data   interface{} `json:"data"`
 }
 
-var (
-	SuccessResponse = ResponseDTO{Status: "success"}
-	ErrorResponse   = ResponseDTO{Status: "error"}
-)
+func Success(data any) ResponseDTO {
+	return ResponseDTO{Status: "success", Data: data}
+}
+
+func Error(err error) ResponseDTO {
+	return ResponseDTO{Status: "error", Error: err.Error()}
+}
 
 func (r ResponseDTO) ToJSON() ([]byte, error) {
 	return json.Marshal(r)

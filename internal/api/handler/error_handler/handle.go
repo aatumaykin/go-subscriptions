@@ -7,9 +7,7 @@ import (
 )
 
 func HandleError(w http.ResponseWriter, err error) {
-	responseDto := api_response.ErrorResponse
-	responseDto.Error = err.Error()
-	response, err := responseDto.ToJSON()
+	response, err := api_response.Error(err).ToJSON()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

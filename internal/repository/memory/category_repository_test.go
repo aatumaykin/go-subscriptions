@@ -161,7 +161,7 @@ func TestCategoryRepository_Update(t *testing.T) {
 			initialCategory: entity.Category{Name: "Category 3"},
 			updatedCategory: entity.Category{ID: 10, Name: "Updated Category 2"},
 			wantResult:      nil,
-			wantErr:         repository.ErrUpdateCategory,
+			wantErr:         repository.ErrNotFoundCategory,
 		},
 	}
 
@@ -209,7 +209,7 @@ func TestCategoryRepository_Delete(t *testing.T) {
 			name:     "Delete a non-existing category",
 			category: entity.Category{Name: "Category 3"},
 			id:       10,
-			wantErr:  repository.ErrDeleteCategory,
+			wantErr:  repository.ErrNotFoundCategory,
 		},
 	}
 

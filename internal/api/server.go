@@ -113,9 +113,37 @@ func WithHealthHandler() Configuration {
 	}
 }
 
-func WithCategoryCollectionGetterHandler(categoryService *service.CategoryService) Configuration {
+func WithCategoryCollectionGetHandler(categoryService *service.CategoryService) Configuration {
 	return func(s *HTTPServer) error {
-		s.router.GET("/api/categories", category_handler.CollectionGetterHandle(s.ctx, categoryService))
+		s.router.GET("/api/categories", category_handler.CollectionGetHandle(s.ctx, categoryService))
+		return nil
+	}
+}
+
+func WithCategoryCreateHandler(categoryService *service.CategoryService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.POST("/api/category", category_handler.CreateHandle(s.ctx, categoryService))
+		return nil
+	}
+}
+
+func WithCategoryGetHandler(categoryService *service.CategoryService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.GET("/api/category/:id", category_handler.GetHandle(s.ctx, categoryService))
+		return nil
+	}
+}
+
+func WithCategoryUpdateHandler(categoryService *service.CategoryService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.PUT("/api/category/:id", category_handler.UpdateHandle(s.ctx, categoryService))
+		return nil
+	}
+}
+
+func WithCategoryDeleteHandler(categoryService *service.CategoryService) Configuration {
+	return func(s *HTTPServer) error {
+		s.router.DELETE("/api/category/:id", category_handler.DeleteHandle(s.ctx, categoryService))
 		return nil
 	}
 }

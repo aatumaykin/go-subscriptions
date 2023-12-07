@@ -33,24 +33,20 @@ func TestHandleError(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a new request
 			_, err := http.NewRequest("GET", "/error", nil)
 			assert.NoError(t, err)
 
-			// Create a new ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-			rr := httptest.NewRecorder()
+			w := httptest.NewRecorder()
 
-			// Call the function to execute the request
-			error_handler.HandleError(rr, tc.inputError)
+			error_handler.HandleError(w, tc.inputError)
 
-			// Check the status code is what we expect.
-			assert.Equal(t, tc.expectedStatus, rr.Code, "handler returned wrong status code")
-			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"), "handler returned wrong content type")
+			assert.Equal(t, tc.expectedStatus, w.Code, "handler returned wrong status code")
+			assert.Equal(t, "application/json", w.Header().Get("Content-Type"), "handler returned wrong content type")
 
 			expectedBody, err := json.Marshal(tc.expectedBody)
 			assert.NoError(t, err)
 
-			assert.Equal(t, string(expectedBody), rr.Body.String(), "handler returned unexpected body")
+			assert.Equal(t, string(expectedBody), w.Body.String(), "handler returned unexpected body")
 		})
 	}
 }

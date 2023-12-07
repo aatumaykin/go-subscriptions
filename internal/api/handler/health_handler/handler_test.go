@@ -1,7 +1,6 @@
 package health_handler_test
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -32,28 +31,19 @@ func TestHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a new router and add the route
-			router := httprouter.New()
-			router.GET("/health", health_handler.Handle())
+			w := httptest.NewRecorder()
+			r := &http.Request{}
+			ps := httprouter.Params{}
 
-			// Create a new request
-			req, err := http.NewRequestWithContext(context.Background(), "GET", "/health", nil)
-			assert.NoError(t, err)
+			health_handler.Handle()(w, r, ps)
 
-			// Create a new ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-			rr := httptest.NewRecorder()
-
-			// Call the router's ServeHTTP method to execute the request
-			router.ServeHTTP(rr, req)
-
-			// Check the status code is what we expect.
-			assert.Equal(t, tc.expectedStatus, rr.Code, "handler returned wrong status code")
-			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"), "handler returned wrong content type")
+			assert.Equal(t, tc.expectedStatus, w.Code, "handler returned wrong status code")
+			assert.Equal(t, "application/json", w.Header().Get("Content-Type"), "handler returned wrong content type")
 
 			expectedBody, err := json.Marshal(tc.expectedBody)
 			assert.NoError(t, err)
 
-			assert.Equal(t, string(expectedBody), rr.Body.String(), "handler returned unexpected body")
+			assert.Equal(t, string(expectedBody), w.Body.String(), "handler returned unexpected body")
 		})
 	}
 }

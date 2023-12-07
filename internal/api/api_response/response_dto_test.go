@@ -14,8 +14,7 @@ func TestResponseDTO_ToJSON(t *testing.T) {
 			"name": "John",
 			"age":  30,
 		}
-		response := api_response.SuccessResponse
-		response.Data = data
+		response := api_response.Success(data)
 		expected, _ := json.Marshal(response)
 
 		result, err := response.ToJSON()
@@ -26,11 +25,7 @@ func TestResponseDTO_ToJSON(t *testing.T) {
 
 	t.Run("Marshal invalid JSON", func(t *testing.T) {
 		data := make(chan int)
-		response := api_response.SuccessResponse
-		response.Data = data
-
-		_, err := response.ToJSON()
-
+		_, err := api_response.Success(data).ToJSON()
 		assert.Error(t, err)
 	})
 }
